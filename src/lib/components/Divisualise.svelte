@@ -247,9 +247,9 @@
                     <button 
                         on:click={resetCall}
                         disabled={!call.isDivided() || playing}
-                        class=" rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-105 active:scale-95"
+                        class="rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-125 active:scale-75"
                         class:bg-white={call.isDivided() || playing}
-                        class:bg-gray-300={!call.isDivided() || playing}
+                        class:bg-gray-400={!call.isDivided() || playing}
                     >
                         <Icon src={ImCross} size="16" color={call.isDivided() ? "#9ca3af" : "black"}/>
                     </button>
@@ -257,13 +257,13 @@
                     <!-- Lock camera -->
                     {#if lockCamera}
                         <button on:click={() => lockCamera = false}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black"
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black brightness-0 hover:scale-125 active:scale-75"
                         >
                             <Icon src={HiSolidVideoCamera} size="16" color="black"/>
                         </button>
                     {:else}
                         <button on:click={() => { lockCamera = true ; highlightedCall = highlightedCall }}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black"
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black brightness-0 hover:scale-125 active:scale-75"
                         >
                             <Icon src={HiOutlineVideoCamera} size="16" color="black"/>
                         </button>
@@ -281,7 +281,7 @@
                         disabled={playing || !call.isDivided()}
                         class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-r-2 border-black rounded-l-full hover:z-10 active:z-10 pl-2 md:pl-3"
                         class:bg-white={!playing && call.isDivided()}
-                        class:bg-gray-300={playing || !call.isDivided()}
+                        class:bg-gray-400={playing || !call.isDivided()}
                     >
                         <Icon 
                             src={FaSolidStepBackward} 
@@ -296,7 +296,7 @@
                         disabled={!playing && !detailsPlaying && !keyframesPlaying}
                         class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:z-10 active:z-10"
                         class:bg-white={playing || detailsPlaying || keyframesPlaying}
-                        class:bg-gray-300={!playing && !detailsPlaying && !keyframesPlaying}
+                        class:bg-gray-400={!playing && !detailsPlaying && !keyframesPlaying}
                     >
                         <Icon 
                             src={FaSolidPause} 
@@ -309,7 +309,7 @@
                         disabled={playing || call.isSolved() && detailsEnded}
                         class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:z-10 active:z-10"
                         class:bg-white={!(playing || call.isSolved() && detailsEnded)}
-                        class:bg-gray-300={playing || call.isSolved() && detailsEnded}
+                        class:bg-gray-400={playing || call.isSolved() && detailsEnded}
 
                     >
                         <Icon 
@@ -335,7 +335,7 @@
                             || keyframesPlaying 
                             || call.isSolved() && detailsEnded
                         )}
-                        class:bg-gray-300={
+                        class:bg-gray-400={
                             playing 
                             || detailsPlaying 
                             || keyframesPlaying 

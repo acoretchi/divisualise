@@ -11,9 +11,10 @@ export class NumberValue {
     }
 
     copy(): NumberValue {
-        return new NumberValue(this.value)
-            .coloured(this.colour)
-            .struckThrough(this.struck);
+        const copy = new NumberValue(this.value)
+        copy.colour = this.colour;
+        copy.struck = this.struck;
+        return copy;
     }
 
     copyDefault(): NumberValue {

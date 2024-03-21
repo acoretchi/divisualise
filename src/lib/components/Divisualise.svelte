@@ -247,7 +247,7 @@
                     <button 
                         on:click={resetCall}
                         disabled={!call.isDivided() || playing}
-                        class=" rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:scale-105 active:scale-95"
+                        class=" rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-105 active:scale-95"
                         class:bg-white={call.isDivided() || playing}
                         class:bg-gray-300={!call.isDivided() || playing}
                     >
@@ -257,13 +257,13 @@
                     <!-- Lock camera -->
                     {#if lockCamera}
                         <button on:click={() => lockCamera = false}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400"
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black"
                         >
                             <Icon src={HiSolidVideoCamera} size="16" color="black"/>
                         </button>
                     {:else}
                         <button on:click={() => { lockCamera = true ; highlightedCall = highlightedCall }}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400"
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black"
                         >
                             <Icon src={HiOutlineVideoCamera} size="16" color="black"/>
                         </button>
@@ -279,7 +279,7 @@
                     <button 
                         on:click={stepBack}
                         disabled={playing || !call.isDivided()}
-                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-r-2 border-black rounded-l-full hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-r-4 active:border-r-4 pl-2 md:pl-3"
+                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-r-2 border-black rounded-l-full hover:z-10 active:z-10 pl-2 md:pl-3"
                         class:bg-white={!playing && call.isDivided()}
                         class:bg-gray-300={playing || !call.isDivided()}
                     >
@@ -294,7 +294,7 @@
                     <button 
                         on:click={() => {playing = false; detailsPlaying = false; keyframesPlaying = false}}
                         disabled={!playing && !detailsPlaying && !keyframesPlaying}
-                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:z-10 active:z-10"
                         class:bg-white={playing || detailsPlaying || keyframesPlaying}
                         class:bg-gray-300={!playing && !detailsPlaying && !keyframesPlaying}
                     >
@@ -307,7 +307,7 @@
                     <button 
                         on:click={play}
                         disabled={playing || call.isSolved() && detailsEnded}
-                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:z-10 active:z-10"
                         class:bg-white={!(playing || call.isSolved() && detailsEnded)}
                         class:bg-gray-300={playing || call.isSolved() && detailsEnded}
 
@@ -328,7 +328,7 @@
                             || keyframesPlaying 
                             || call.isSolved() && detailsEnded
                         }
-                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-l-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 rounded-r-full hover:border-l-4 active:border-l-4 pr-2 md:pr-3"
+                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-l-2 border-black hover:z-10 active:z-10 rounded-r-full pr-2 md:pr-3"
                         class:bg-white={!(
                             playing 
                             || detailsPlaying 
@@ -434,7 +434,7 @@
                                             || keyframesPlaying
                                             || detailsStepIndex === 0 && detailsKeyframeIndex === 0
                                         }
-                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-r-2 border-black rounded-l-full hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-r-4 active:border-r-4 pl-3"
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-r-2 border-black rounded-l-full hover:z-10 active:z-10 pl-3"
                                         class:bg-white={!(
                                             playing
                                             || detailsPlaying
@@ -467,7 +467,7 @@
                                             || keyframesPlaying
                                             || detailsStepIndex === 0 && detailsKeyframeIndex === 0
                                         }
-                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:z-10 active:z-10"
                                         class:bg-white={!(
                                             playing
                                             || detailsPlaying
@@ -499,7 +499,7 @@
                                             || !detailsPlaying
                                             || !keyframesPlaying
                                         }
-                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:z-10 active:z-10"
                                         class:bg-white={!(
                                             playing
                                             || !detailsPlaying
@@ -528,7 +528,7 @@
                                             || keyframesPlaying
                                             || detailsEnded && keyframesEnded
                                         }
-                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:z-10 active:z-10"
                                         class:bg-white={!(
                                             playing
                                             || detailsPlaying
@@ -562,7 +562,7 @@
                                             || keyframesPlaying
                                             || detailsEnded && keyframesEnded
                                         )}
-                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:z-10 active:z-10"
                                         class:bg-white={!(
                                             playing
                                             || detailsPlaying
@@ -595,7 +595,7 @@
                                             || detailsEnded
                                             || detailsStepIndex === highlightedCall.details().length - 1
                                         )}
-                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-l-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 rounded-r-full hover:border-l-4 active:border-l-4 pr-3"
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-l-2 border-black hover:z-10 active:z-10 rounded-r-full pr-3"
                                         class:bg-white={!(
                                             playing
                                             || detailsPlaying

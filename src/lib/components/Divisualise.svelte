@@ -1,621 +1,710 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	import Icon from 'svelte-icons-pack/Icon.svelte';
-	import FaSolidStepBackward from 'svelte-icons-pack/fa/FaSolidStepBackward';
-	import FaSolidStepForward from 'svelte-icons-pack/fa/FaSolidStepForward';
-	import FaSolidBackward from 'svelte-icons-pack/fa/FaSolidBackward';
-	import FaSolidForward from 'svelte-icons-pack/fa/FaSolidForward';
-	import FaSolidPlay from 'svelte-icons-pack/fa/FaSolidPlay';
-	import FaSolidPause from 'svelte-icons-pack/fa/FaSolidPause';
-	import FaSolidChevronLeft from 'svelte-icons-pack/fa/FaSolidChevronLeft';
-	import HiOutlineVideoCamera from 'svelte-icons-pack/hi/HiOutlineVideoCamera';
-	import HiSolidVideoCamera from 'svelte-icons-pack/hi/HiSolidVideoCamera';
-	import ImCross from 'svelte-icons-pack/im/ImCross';
-	import { onMount } from 'svelte';
-	import { fly, fade } from 'svelte/transition';
-	import panzoom from 'panzoom';
-	import type { PanZoom } from 'panzoom';
-	import RecursiveCallComponent from '$lib/components/RecursiveCall.svelte';
-	import type { RecursiveCall } from '$lib/core/recursive_call';
-	import Value from '$lib/components/values/Value.svelte';
+    import { createEventDispatcher } from "svelte";
+    import Icon from "svelte-icons-pack/Icon.svelte";
+    import FaSolidStepBackward from "svelte-icons-pack/fa/FaSolidStepBackward";
+    import FaSolidStepForward from "svelte-icons-pack/fa/FaSolidStepForward";
+    import FaSolidBackward from "svelte-icons-pack/fa/FaSolidBackward";
+    import FaSolidForward from "svelte-icons-pack/fa/FaSolidForward";
+    import FaSolidPlay from "svelte-icons-pack/fa/FaSolidPlay";
+    import FaSolidPause from "svelte-icons-pack/fa/FaSolidPause";
+    import FaSolidChevronLeft from "svelte-icons-pack/fa/FaSolidChevronLeft";
+    import HiOutlineVideoCamera from "svelte-icons-pack/hi/HiOutlineVideoCamera";
+    import HiSolidVideoCamera from "svelte-icons-pack/hi/HiSolidVideoCamera";
+    import ImCross from "svelte-icons-pack/im/ImCross";
+    import { onMount } from 'svelte';
+    import { fly, fade } from 'svelte/transition';
+    import panzoom from "panzoom";
+    import type { PanZoom } from "panzoom";
+    import RecursiveCallComponent from "$lib/components/RecursiveCall.svelte";
+    import type { RecursiveCall } from "$lib/core/recursive_call"
+    import Value from "$lib/components/values/Value.svelte"
 
-	export let call: RecursiveCall<unknown, unknown>;
-	export let algorithmName: string;
-	const dispatch = createEventDispatcher();
-	let container: HTMLDivElement;
-	let pz: PanZoom;
-	let highlightedCall: RecursiveCall<unknown, unknown> | null = null;
-	let callComponent: RecursiveCallComponent<unknown, unknown>;
-	let detailsStepIndex = 0;
-	let detailsKeyframeIndex = 0;
-	let detailsPlaying = false;
-	let keyframesPlaying = false;
-	let playing = false;
-	let showDetails = true;
-	let lockCamera = true;
-	let playbackSpeed = 1;
 
-	// When the highlighted call changes, move to the start of the details
-	$: if (highlightedCall !== null) {
-		detailsStepIndex = 0;
-		detailsKeyframeIndex = 0;
-	}
+    export let call: RecursiveCall<unknown, unknown>;
+    export let algorithmName: string;
+    const dispatch = createEventDispatcher();
+    let container: HTMLDivElement;
+    let pz: PanZoom;
+    let highlightedCall: RecursiveCall<unknown, unknown> | null = null
+    let callComponent: RecursiveCallComponent<unknown, unknown>
+    let detailsStepIndex = 0
+    let detailsKeyframeIndex = 0
+    let detailsPlaying = false
+    let keyframesPlaying = false
+    let playing = false
+    let showDetails = true
+    let lockCamera = true
+    let playbackSpeed = 1
 
-	// Set the value keyframes as the value keyframes of the current details step
-	$: valueKeyframes =
-		highlightedCall !== null && highlightedCall.details()[detailsStepIndex].valueKeyframes
-			? highlightedCall.details()[detailsStepIndex].valueKeyframes
-			: null;
+    // When the highlighted call changes, move to the start of the details
+    $: if (highlightedCall !== null) {
+        detailsStepIndex = 0
+        detailsKeyframeIndex = 0
+    }
 
-	$: keyframesEnded =
-		highlightedCall !== null &&
-		(valueKeyframes ? detailsKeyframeIndex === valueKeyframes.length - 1 : true);
+    // Set the value keyframes as the value keyframes of the current details step
+    $: valueKeyframes = (
+        (
+            highlightedCall !== null &&
+            highlightedCall.details()[detailsStepIndex].valueKeyframes
+        ) ?
+        highlightedCall.details()[detailsStepIndex].valueKeyframes :
+        null
+    )
 
-	$: detailsEnded =
-		highlightedCall !== null &&
-		detailsStepIndex === highlightedCall.details().length - 1 &&
-		keyframesEnded;
+    $: keyframesEnded = (
+        highlightedCall !== null &&
+        (
+            valueKeyframes ?
+            detailsKeyframeIndex === valueKeyframes.length - 1 :
+            true
+        )
+    )
 
-	function stepKeyframes() {
-		if (highlightedCall !== null && valueKeyframes) {
-			detailsKeyframeIndex = Math.min(valueKeyframes.length - 1, detailsKeyframeIndex + 1);
-		}
-	}
+    $: detailsEnded = (
+        highlightedCall !== null &&
+        detailsStepIndex === highlightedCall.details().length - 1 &&
+        keyframesEnded
+    )
 
-	function stepBackKeyframes() {
-		if (highlightedCall !== null && valueKeyframes) {
-			detailsKeyframeIndex = Math.max(0, detailsKeyframeIndex - 1);
-		}
-	}
+    function stepKeyframes() {
+        if (highlightedCall !== null && valueKeyframes) {
+            detailsKeyframeIndex = Math.min(valueKeyframes.length - 1, detailsKeyframeIndex + 1)
+        }
+    }
 
-	async function playKeyframes() {
-		if (highlightedCall !== null && !keyframesEnded && !keyframesPlaying) {
-			keyframesPlaying = true;
-			while (!keyframesEnded && keyframesPlaying) {
-				stepKeyframes();
-				await new Promise((resolve) => setTimeout(resolve, 200 / playbackSpeed));
-			}
-			keyframesPlaying = false;
-		}
-	}
+    function stepBackKeyframes() {
+        if (highlightedCall !== null && valueKeyframes) {
+            detailsKeyframeIndex = Math.max(0, detailsKeyframeIndex - 1)
+        }
+    }
 
-	async function stepDetails() {
-		if (highlightedCall !== null) {
-			await playKeyframes();
-			const currentIndex = detailsStepIndex;
-			detailsStepIndex = Math.min(highlightedCall.details().length - 1, detailsStepIndex + 1);
-			if (currentIndex !== detailsStepIndex) {
-				detailsKeyframeIndex = 0;
-			}
-		}
-	}
+    async function playKeyframes() {
+        if (highlightedCall !== null && !keyframesEnded && !keyframesPlaying) {
+            keyframesPlaying = true;
+            while (!keyframesEnded && keyframesPlaying) {
+                stepKeyframes();
+                await new Promise(resolve => setTimeout(resolve, 200 / playbackSpeed))
+            }
+            keyframesPlaying = false;
+        }
+    }
 
-	function stepBackDetails() {
-		if (highlightedCall !== null) {
-			detailsStepIndex = Math.max(0, detailsStepIndex - 1);
-			detailsKeyframeIndex = 0;
-		}
-	}
+    async function stepDetails() {
+        if (highlightedCall !== null) {
+            await playKeyframes()
+            const currentIndex = detailsStepIndex
+            detailsStepIndex = Math.min(highlightedCall.details().length - 1, detailsStepIndex + 1)
+            if (currentIndex !== detailsStepIndex) {
+                detailsKeyframeIndex = 0
+            } 
+        }
+    }
 
-	async function playDetails() {
-		if (highlightedCall !== null && !detailsEnded && !detailsPlaying) {
-			detailsPlaying = true;
-			while (!detailsEnded && detailsPlaying) {
-				await stepDetails();
-				await new Promise((resolve) => setTimeout(resolve, 800 / playbackSpeed));
-			}
-			detailsPlaying = false;
-		}
-	}
+    function stepBackDetails() {
+        if (highlightedCall !== null) {
+            detailsStepIndex = Math.max(0, detailsStepIndex - 1)
+            detailsKeyframeIndex = 0
+        }
+    }
 
-	function stepDetailsOrKeyframes() {
-		if (highlightedCall !== null) {
-			if (valueKeyframes && !keyframesEnded) {
-				stepKeyframes();
-			} else if (!detailsEnded) {
-				stepDetails();
-			}
-		}
-	}
+    async function playDetails() {
+        if (highlightedCall !== null && !detailsEnded && !detailsPlaying) {
+            detailsPlaying = true;
+            while (!detailsEnded && detailsPlaying) {
+                await stepDetails();
+                await new Promise(resolve => setTimeout(resolve, 800 / playbackSpeed))
+            }
+            detailsPlaying = false;
+        }
+    }
 
-	function stepBackDetailsOrKeyframes() {
-		if (highlightedCall !== null) {
-			if (valueKeyframes && detailsKeyframeIndex > 0) {
-				stepBackKeyframes();
-			} else if (detailsStepIndex > 0) {
-				stepBackDetails();
-			}
-		}
-	}
+    function stepDetailsOrKeyframes() {
+        if (highlightedCall !== null) {
+            if (valueKeyframes && !keyframesEnded) {
+                stepKeyframes()
+            }
+            else if (!detailsEnded) {
+                stepDetails()
+            }
+        }
+    }
 
-	async function step() {
-		if (highlightedCall === null && !call.isDivided()) {
-			highlightedCall = call;
-			return;
-		}
-		if (
-			highlightedCall === null ||
-			detailsEnded ||
-			highlightedCall !== call.lastActedUpon() ||
-			!showDetails
-		) {
-			callComponent.step();
-			call = call;
-		} else {
-			await stepDetails();
-		}
-	}
+    function stepBackDetailsOrKeyframes() {
+        if (highlightedCall !== null) {
+            if (valueKeyframes && detailsKeyframeIndex > 0) {
+                stepBackKeyframes()
+            }
+            else if (detailsStepIndex > 0) {
+                stepBackDetails()
+            }
+        }
+    }
 
-	function stepBack() {
-		if (
-			highlightedCall === null ||
-			(detailsStepIndex === 0 && detailsKeyframeIndex === 0) ||
-			highlightedCall !== call.lastActedUpon() ||
-			!showDetails
-		) {
-			callComponent.back();
-			call = call;
-		} else {
-			stepBackDetails();
-		}
-	}
+    async function step() {
+        if (highlightedCall === null && !call.isDivided()) {
+            highlightedCall = call
+            return
+        }
+        if (
+            highlightedCall === null 
+            || detailsEnded 
+            || highlightedCall !== call.lastActedUpon()
+            || !showDetails
+        ) {
+            callComponent.step()
+            call = call
+        }
+        else {
+            await stepDetails()
+        }
+    }
 
-	async function play() {
-		if (playing) {
-			return;
-		}
-		playing = true;
-		while ((!call.isSolved() && playing) || (!detailsEnded && showDetails)) {
-			await step();
-			await new Promise((resolve) => setTimeout(resolve, 800 / playbackSpeed));
-		}
-		playing = false;
-	}
+    function stepBack() {
+        if (
+            highlightedCall === null
+            || (
+                detailsStepIndex === 0
+                && detailsKeyframeIndex === 0
+            )
+            || highlightedCall !== call.lastActedUpon()
+            || !showDetails
+        ) {
+            callComponent.back()
+            call = call
+        }
+        else {
+            stepBackDetails()
+        }
+    }
 
-	function onHighlightedPosition(e: CustomEvent<{ x: number; y: number }>) {
-		if (!lockCamera) {
-			return;
-		}
+    async function play() {
+        if (playing) {
+            return
+        }
+        playing = true;
+        while (!call.isSolved() && playing || (!detailsEnded && showDetails)) {
+            await step()
+            await new Promise(resolve => setTimeout(resolve, 800 / playbackSpeed))
+        }
+        playing = false;
+    }
 
-		// We map the screen-space coordinates to the panzoom view-space coordinates
-		const transform = pz.getTransform();
-		const containerRect = container.getBoundingClientRect();
+    function onHighlightedPosition(e: CustomEvent<{ x: number, y: number }>) {
+        if (!lockCamera) {
+            return
+        }
 
-		const relativeX = e.detail.x - containerRect.left;
-		const relativeY = e.detail.y - containerRect.top;
+        // We map the screen-space coordinates to the panzoom view-space coordinates
+        const transform = pz.getTransform();
+        const containerRect = container.getBoundingClientRect();
 
-		const newX =
-			(containerRect.width / 2) * (1 + (1 - transform.scale) / transform.scale) - relativeX;
-		const newY =
-			(containerRect.height / 2) * (1 + (1 - transform.scale) / transform.scale) - relativeY;
+        const relativeX = e.detail.x - containerRect.left;
+        const relativeY = e.detail.y - containerRect.top;
 
-		// Move the panzoom view to the new translation smoothly
-		pz.smoothMoveTo(newX, newY);
-	}
+        const newX = (containerRect.width / 2) * (1 + (1 - transform.scale) / transform.scale) - relativeX
+        const newY = (containerRect.height / 2) * (1 + (1 - transform.scale) / transform.scale) - relativeY
 
-	function resetCall() {
-		call.reset();
-		call = call;
-		highlightedCall = call;
-	}
+        // Move the panzoom view to the new translation smoothly
+        pz.smoothMoveTo(newX, newY)
+    }
 
-	function updateCall() {
-		call = call;
-	}
+    function resetCall() {
+        call.reset()
+        call = call
+        highlightedCall = call
+    }
 
-	onMount(() => {
-		pz = panzoom(container, {
-			maxZoom: 1,
-			minZoom: 0.1,
-			bounds: false,
-			zoomSpeed: 0.065
-		});
-	});
+    function updateCall() {
+        call = call
+    }
+
+    onMount(() => {
+        pz = panzoom(container, {
+            maxZoom: 1,
+            minZoom: 0.1,
+            bounds: false,
+            zoomSpeed: 0.065,
+        });
+    });
+    
 </script>
 
 <div class="flex flex-col md:flex-row w-screen h-screen overflow-clip">
-	<div class="relative flex flex-col w-full h-full bg-gray-100 overflow-clip">
-		<!-- Controls -->
-		<div
-			class="absolute flex flex-col md:flex-row md:space-x-6 items-center bottom-0 w-full z-50 p-3 md:p-4"
-		>
-			<div class="flex w-full md:w-fit mb-2 md:mb-0">
-				<div class="space-x-1">
-					<!-- Reset -->
-					<button
-						on:click={resetCall}
-						disabled={!call.isDivided() || playing}
-						class=" rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:scale-105 active:scale-95"
-						class:bg-white={call.isDivided() || playing}
-						class:bg-gray-300={!call.isDivided() || playing}
-					>
-						<Icon src={ImCross} size="16" color={call.isDivided() ? '#9ca3af' : 'black'} />
-					</button>
 
-					<!-- Lock camera -->
-					{#if lockCamera}
-						<button
-							on:click={() => (lockCamera = false)}
-							class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400"
-						>
-							<Icon src={HiSolidVideoCamera} size="16" color="black" />
-						</button>
-					{:else}
-						<button
-							on:click={() => {
-								lockCamera = true;
-								highlightedCall = highlightedCall;
-							}}
-							class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400"
-						>
-							<Icon src={HiOutlineVideoCamera} size="16" color="black" />
-						</button>
-					{/if}
-				</div>
-			</div>
+    <div 
+        class="relative flex flex-col w-full h-full bg-gray-100 overflow-clip"
+    >
+        <!-- Controls -->
+        <div class="absolute flex flex-col md:flex-row md:space-x-6 items-center bottom-0 w-full z-50 p-3 md:p-4">
 
-			<div class="flex w-full md:w-fit justify-between md:justify-start md:space-x-8 items-center">
-				<!-- Playback -->
-				<div class="flex">
-					<!-- Step back -->
-					<button
-						on:click={stepBack}
-						disabled={playing || !call.isDivided()}
-						class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-r-2 border-black rounded-l-full hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-r-4 active:border-r-4 pl-2 md:pl-3"
-						class:bg-white={!playing && call.isDivided()}
-						class:bg-gray-300={playing || !call.isDivided()}
-					>
-						<Icon src={FaSolidStepBackward} size="16" color={'black'} />
-					</button>
+            <div class="flex w-full md:w-fit mb-2 md:mb-0">
+                <div class="space-x-1">
+                    <!-- Reset -->
+                    <button 
+                        on:click={resetCall}
+                        disabled={!call.isDivided() || playing}
+                        class=" rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:scale-105 active:scale-95"
+                        class:bg-white={call.isDivided() || playing}
+                        class:bg-gray-300={!call.isDivided() || playing}
+                    >
+                        <Icon src={ImCross} size="16" color={call.isDivided() ? "#9ca3af" : "black"}/>
+                    </button>
 
-					<!-- Play/Pause -->
-					<button
-						on:click={() => {
-							playing = false;
-							detailsPlaying = false;
-							keyframesPlaying = false;
-						}}
-						disabled={!playing && !detailsPlaying && !keyframesPlaying}
-						class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
-						class:bg-white={playing || detailsPlaying || keyframesPlaying}
-						class:bg-gray-300={!playing && !detailsPlaying && !keyframesPlaying}
-					>
-						<Icon src={FaSolidPause} size="16" color={'black'} />
-					</button>
-					<button
-						on:click={play}
-						disabled={playing || (call.isSolved() && detailsEnded)}
-						class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
-						class:bg-white={!(playing || (call.isSolved() && detailsEnded))}
-						class:bg-gray-300={playing || (call.isSolved() && detailsEnded)}
-					>
-						<Icon src={FaSolidPlay} size="16" color={'black'} />
-					</button>
+                    <!-- Lock camera -->
+                    {#if lockCamera}
+                        <button on:click={() => lockCamera = false}
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400"
+                        >
+                            <Icon src={HiSolidVideoCamera} size="16" color="black"/>
+                        </button>
+                    {:else}
+                        <button on:click={() => { lockCamera = true ; highlightedCall = highlightedCall }}
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400"
+                        >
+                            <Icon src={HiOutlineVideoCamera} size="16" color="black"/>
+                        </button>
+                    {/if}
+                </div>
+            </div>
 
-					<!-- Step forward -->
-					<button
-						on:click={step}
-						disabled={playing ||
-							detailsPlaying ||
-							keyframesPlaying ||
-							(call.isSolved() && detailsEnded)}
-						class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-l-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 rounded-r-full hover:border-l-4 active:border-l-4 pr-2 md:pr-3"
-						class:bg-white={!(
-							playing ||
-							detailsPlaying ||
-							keyframesPlaying ||
-							(call.isSolved() && detailsEnded)
-						)}
-						class:bg-gray-300={playing ||
-							detailsPlaying ||
-							keyframesPlaying ||
-							(call.isSolved() && detailsEnded)}
-					>
-						<Icon src={FaSolidStepForward} size="16" color={'black'} />
-					</button>
-				</div>
+            <div class="flex w-full md:w-fit justify-between md:justify-start md:space-x-8 items-center">
+                <!-- Playback -->
+                <div class="flex">
+                    
+                    <!-- Step back -->
+                    <button 
+                        on:click={stepBack}
+                        disabled={playing || !call.isDivided()}
+                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-r-2 border-black rounded-l-full hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-r-4 active:border-r-4 pl-2 md:pl-3"
+                        class:bg-white={!playing && call.isDivided()}
+                        class:bg-gray-300={playing || !call.isDivided()}
+                    >
+                        <Icon 
+                            src={FaSolidStepBackward} 
+                            size="16" 
+                            color={"black"}
+                        />
+                    </button>
 
-				<!-- Playback Speed -->
-				<input
-					id="playback-speed"
-					type="range"
-					min="0.5"
-					max="2"
-					step="0.01"
-					bind:value={playbackSpeed}
-					class="cursor-pointer appearance-none bg-transparent"
-				/>
-			</div>
-		</div>
+                    <!-- Play/Pause -->
+                    <button 
+                        on:click={() => {playing = false; detailsPlaying = false; keyframesPlaying = false}}
+                        disabled={!playing && !detailsPlaying && !keyframesPlaying}
+                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                        class:bg-white={playing || detailsPlaying || keyframesPlaying}
+                        class:bg-gray-300={!playing && !detailsPlaying && !keyframesPlaying}
+                    >
+                        <Icon 
+                            src={FaSolidPause} 
+                            size="16" 
+                            color={"black"}
+                        />
+                    </button>
+                    <button 
+                        on:click={play}
+                        disabled={playing || call.isSolved() && detailsEnded}
+                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                        class:bg-white={!(playing || call.isSolved() && detailsEnded)}
+                        class:bg-gray-300={playing || call.isSolved() && detailsEnded}
 
-		<!-- Header -->
-		<div class="flex p-3 md:p-4 z-50">
-			<h1 class="text-3xl font-bold cursor-pointer" on:click={() => dispatch('reset')}>
-				Divisualise!
-			</h1>
-		</div>
+                    >
+                        <Icon 
+                            src={FaSolidPlay} 
+                            size="16" 
+                            color={"black"}
+                        />
+                    </button>
 
-		<!-- Main -->
-		<div class="flex grow w-full h-full justify-center">
-			<div class="flex flex-col w-full h-full items-center pt-[20%]" bind:this={container}>
-				<!-- Show the call -->
-				<RecursiveCallComponent
-					bind:this={callComponent}
-					{call}
-					title={algorithmName}
-					on:update={updateCall}
-					on:highlightedPosition={onHighlightedPosition}
-					on:callReset={updateCall}
-					bind:highlightedCall
-					bind:detailsStepIndex
-					bind:detailsKeyframeIndex
-				/>
-			</div>
-		</div>
-	</div>
+                    <!-- Step forward -->
+                    <button 
+                        on:click={step}
+                        disabled={
+                            playing 
+                            || detailsPlaying 
+                            || keyframesPlaying 
+                            || call.isSolved() && detailsEnded
+                        }
+                        class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-l-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 rounded-r-full hover:border-l-4 active:border-l-4 pr-2 md:pr-3"
+                        class:bg-white={!(
+                            playing 
+                            || detailsPlaying 
+                            || keyframesPlaying 
+                            || call.isSolved() && detailsEnded
+                        )}
+                        class:bg-gray-300={
+                            playing 
+                            || detailsPlaying 
+                            || keyframesPlaying 
+                            || call.isSolved() && detailsEnded
+                        }
+                    >
+                        <Icon 
+                            src={FaSolidStepForward} 
+                            size="16" 
+                            color={"black"}
+                        />
+                    </button>
 
-	<!-- Details -->
-	<div
-		class="flex flex-col h-fit md:h-full max-w-1/2 bg-white drop-shadow-2xl border-t-4 md:border-l-4 md:border-t-0 border-black grow-0 transition-all duration-200 ease-in-out transform {showDetails
-			? 'h-4/5 md:h-full md:w-[60rem]'
-			: 'h-12 md:w-[4rem]'}"
-		class:overflow-y-hidden={!showDetails}
-		class:overflow-y-auto={showDetails}
-	>
-		<div class="flex flex-col w-full md:h-full md:flex-row">
-			<!-- Open / Close -->
-			<div
-				class="md:h-full cursor-pointer"
-				on:click={() => (showDetails = !showDetails)}
-				aria-disabled
-			>
-				<button
-					class="p-2 md:p-4 mb-2 transition-all transform duration-200 {showDetails
-						? '-rotate-90 md:rotate-180'
-						: 'rotate-90 md:rotate-0'}"
-				>
-					<Icon src={FaSolidChevronLeft} size="24" />
-				</button>
-			</div>
+                </div>
 
-			<!-- Body -->
-			{#if showDetails}
-				<div
-					class="pb-2 md:py-4 px-4 md:pl-0 md:pr-8 w-full max-w-full overflow-auto"
-					in:fade={{ duration: 400 }}
-					out:fade={{ duration: 200 }}
-				>
-					{#if highlightedCall !== null}
-						<div class="flex flex-col">
-							<h2 class="text-2xl md:text-3xl font-bold mb-2 md:mt-1">{algorithmName}</h2>
+                <!-- Playback Speed -->
+                <input 
+                    id="playback-speed"
+                    type="range" 
+                    min="0.5" 
+                    max="2" 
+                    step="0.01"
+                    bind:value={playbackSpeed} 
+                    class="cursor-pointer appearance-none bg-transparent"
+                />
+            </div>
 
-							<!-- Details controls -->
-							{#if highlightedCall.details().length >= 1}
-								<!-- Playback -->
-								<div class="flex w-full justify-center mb-4">
-									<!-- Step back details -->
-									<button
-										on:click={stepBackDetails}
-										disabled={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsStepIndex === 0 && detailsKeyframeIndex === 0)}
-										class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-r-2 border-black rounded-l-full hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-r-4 active:border-r-4 pl-3"
-										class:bg-white={!(
-											playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsStepIndex === 0 && detailsKeyframeIndex === 0)
-										)}
-										class:bg-gray-300={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsStepIndex === 0 && detailsKeyframeIndex === 0)}
-									>
-										<div class="w-full flex justify-center">
-											<Icon src={FaSolidBackward} size="16" color={'black'} />
-										</div>
-									</button>
+        </div>
 
-									<!-- Step back -->
-									<button
-										on:click={stepBackDetailsOrKeyframes}
-										disabled={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsStepIndex === 0 && detailsKeyframeIndex === 0)}
-										class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
-										class:bg-white={!(
-											playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsStepIndex === 0 && detailsKeyframeIndex === 0)
-										)}
-										class:bg-gray-300={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsStepIndex === 0 && detailsKeyframeIndex === 0)}
-									>
-										<div class="w-full flex justify-center">
-											<Icon src={FaSolidStepBackward} size="16" color={'black'} />
-										</div>
-									</button>
+        <!-- Header -->
+        <div class="flex p-3 md:p-4 z-50">
+            <h1 class="text-3xl font-bold cursor-pointer" on:click={() => dispatch("reset")}>Divisualise!</h1>
 
-									<!-- Play/Pause -->
-									<button
-										on:click={() => {
-											detailsPlaying = false;
-											keyframesPlaying = false;
-										}}
-										disabled={playing || !detailsPlaying || !keyframesPlaying}
-										class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
-										class:bg-white={!(playing || !detailsPlaying || !keyframesPlaying)}
-										class:bg-gray-300={playing || !detailsPlaying || !keyframesPlaying}
-									>
-										<div class="w-full flex justify-center">
-											<Icon src={FaSolidPause} size="16" color={'black'} />
-										</div>
-									</button>
-									<button
-										on:click={playDetails}
-										disabled={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsEnded && keyframesEnded)}
-										class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
-										class:bg-white={!(
-											playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsEnded && keyframesEnded)
-										)}
-										class:bg-gray-300={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsEnded && keyframesEnded)}
-									>
-										<div class="w-full flex justify-center">
-											<Icon src={FaSolidPlay} size="16" color={'black'} />
-										</div>
-									</button>
+        </div>
 
-									<!-- Step forward -->
-									<button
-										on:click={stepDetailsOrKeyframes}
-										disabled={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsEnded && keyframesEnded)}
-										class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
-										class:bg-white={!(
-											playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsEnded && keyframesEnded)
-										)}
-										class:bg-gray-300={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											(detailsEnded && keyframesEnded)}
-									>
-										<div class="w-full flex justify-center">
-											<Icon src={FaSolidStepForward} size="16" color={'black'} />
-										</div>
-									</button>
+        <!-- Main -->
+        <div class="flex grow w-full h-full justify-center">
+            <div class="flex flex-col w-full h-full items-center pt-[20%]" bind:this={container}>
+                <!-- Show the call -->
+                <RecursiveCallComponent
+                    bind:this={callComponent} 
+                    call={call} 
+                    title={algorithmName}
+                    on:update={updateCall}
+                    on:highlightedPosition={onHighlightedPosition}
+                    on:callReset={updateCall}
+                    bind:highlightedCall
+                    bind:detailsStepIndex
+                    bind:detailsKeyframeIndex
+                />
+            </div>
+        </div>
 
-									<!-- Details Forward -->
-									<button
-										on:click={stepDetails}
-										disabled={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											detailsEnded ||
-											detailsStepIndex === highlightedCall.details().length - 1}
-										class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-l-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 rounded-r-full hover:border-l-4 active:border-l-4 pr-3"
-										class:bg-white={!(
-											playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											detailsEnded ||
-											detailsStepIndex === highlightedCall.details().length - 1
-										)}
-										class:bg-gray-300={playing ||
-											detailsPlaying ||
-											keyframesPlaying ||
-											detailsEnded ||
-											detailsStepIndex === highlightedCall.details().length - 1}
-									>
-										<div class="w-full flex justify-center">
-											<Icon src={FaSolidForward} size="16" color={'black'} />
-										</div>
-									</button>
-								</div>
+    </div>
 
-								<p class="mb-4 text-lg md:text-xl font-semibold">
-									{highlightedCall.details()[detailsStepIndex].text}
-								</p>
-								{#if valueKeyframes}
-									<Value value={valueKeyframes[detailsKeyframeIndex]} capitalise={false} />
-								{/if}
-							{:else}
-								<div class="w-full h-full flex items-center justify-center">
-									<h2 class="text-2xl font-bold text-gray-300">No details to show.</h2>
-								</div>
-							{/if}
-						</div>
-					{:else}
-						<div class="w-full h-full flex items-center justify-center">
-							<h2 class="text-2xl font-bold text-gray-300">No call selected</h2>
-						</div>
-					{/if}
-				</div>
-			{/if}
-		</div>
-	</div>
+    <!-- Details -->
+    <div class="flex flex-col h-fit md:h-full max-w-1/2 bg-white drop-shadow-2xl border-t-4 md:border-l-4 md:border-t-0 border-black grow-0 transition-all duration-200 ease-in-out transform {showDetails ? 'h-4/5 md:h-full md:w-[60rem]' : 'h-12 md:w-[4rem]'}"
+        class:overflow-y-hidden={!showDetails}
+        class:overflow-y-auto={showDetails}
+    >
+        <div class="flex flex-col w-full md:h-full md:flex-row ">
+
+            <!-- Open / Close -->
+            <div 
+                class="md:h-full cursor-pointer" 
+                on:click={() => showDetails = !showDetails} 
+                aria-disabled
+            >
+                <button 
+                    class="p-2 md:p-4 mb-2 transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}"
+                >
+                    <Icon src={FaSolidChevronLeft} size="24" />
+                </button>
+            </div>
+
+            <!-- Body -->
+            {#if showDetails}
+                <div class="pb-2 md:py-4 px-4 md:pl-0 md:pr-8 w-full max-w-full overflow-auto" in:fade={{ duration: 400 }} out:fade={{ duration: 200 }}>
+                    {#if highlightedCall !== null}
+                        <div class="flex flex-col">
+                            <h2 class="text-2xl md:text-3xl font-bold mb-2 md:mt-1">{algorithmName}</h2>
+
+                            <!-- Details controls -->
+                            {#if highlightedCall.details().length >= 1}
+
+
+                                <!-- Playback -->
+                                <div class="flex w-full justify-center mb-4">
+
+                                    <!-- Step back details -->
+                                    <button 
+                                        on:click={stepBackDetails}
+                                        disabled={
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                        }
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-r-2 border-black rounded-l-full hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-r-4 active:border-r-4 pl-3"
+                                        class:bg-white={!(
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                        
+                                        )}
+                                        class:bg-gray-300={
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                        }
+                                    >
+                                        <div class="w-full flex justify-center">
+                                            <Icon 
+                                                src={FaSolidBackward} 
+                                                size="16" 
+                                                color={"black"}
+                                            />
+                                        </div>
+                                    </button>
+                                    
+                                    <!-- Step back -->
+                                    <button 
+                                        on:click={stepBackDetailsOrKeyframes}
+                                        disabled={
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                        }
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                                        class:bg-white={!(
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                        
+                                        )}
+                                        class:bg-gray-300={
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                        }
+                                    >
+                                        <div class="w-full flex justify-center">
+                                            <Icon 
+                                                src={FaSolidStepBackward} 
+                                                size="16" 
+                                                color={"black"}
+                                            />
+                                        </div>
+                                    </button>
+
+                                    <!-- Play/Pause -->
+                                    <button 
+                                        on:click={() => {detailsPlaying = false; keyframesPlaying = false}}
+                                        disabled={
+                                            playing
+                                            || !detailsPlaying
+                                            || !keyframesPlaying
+                                        }
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                                        class:bg-white={!(
+                                            playing
+                                            || !detailsPlaying
+                                            || !keyframesPlaying
+                                        
+                                        )}
+                                        class:bg-gray-300={
+                                            playing
+                                            || !detailsPlaying
+                                            || !keyframesPlaying
+                                        }
+                                    >
+                                        <div class="w-full flex justify-center">
+                                            <Icon 
+                                                src={FaSolidPause} 
+                                                size="16" 
+                                                color={"black"}
+                                            />
+                                        </div>
+                                    </button>
+                                    <button 
+                                        on:click={playDetails}
+                                        disabled={
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded && keyframesEnded
+                                        }
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                                        class:bg-white={!(
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded && keyframesEnded
+                                        
+                                        )}
+                                        class:bg-gray-300={
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded && keyframesEnded
+                                        }
+
+                                    >
+                                        <div class="w-full flex justify-center">
+                                            <Icon 
+                                                src={FaSolidPlay} 
+                                                size="16" 
+                                                color={"black"}
+                                            />
+                                        </div>
+                                    </button>
+
+                                    <!-- Step forward -->
+                                    <button 
+                                        on:click={stepDetailsOrKeyframes}
+                                        disabled={(
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded && keyframesEnded
+                                        )}
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 hover:border-x-4 active:border-x-4"
+                                        class:bg-white={!(
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded && keyframesEnded
+                                        )}
+                                        class:bg-gray-300={
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded && keyframesEnded
+                                        }
+                                    >
+                                        <div class="w-full flex justify-center">
+                                            <Icon 
+                                                src={FaSolidStepForward} 
+                                                size="16" 
+                                                color={"black"}
+                                            />
+                                        </div>
+                                    </button>
+
+                                    <!-- Details Forward -->
+                                    <button 
+                                        on:click={stepDetails}
+                                        disabled={(
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded
+                                            || detailsStepIndex === highlightedCall.details().length - 1
+                                        )}
+                                        class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-l-2 border-black hover:outline hover:outline-4 hover:outline-blue-400 hover:z-10 active:z-10 rounded-r-full hover:border-l-4 active:border-l-4 pr-3"
+                                        class:bg-white={!(
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded
+                                            || detailsStepIndex === highlightedCall.details().length - 1
+                                        )}
+                                        class:bg-gray-300={
+                                            playing
+                                            || detailsPlaying
+                                            || keyframesPlaying
+                                            || detailsEnded
+                                            || detailsStepIndex === highlightedCall.details().length - 1
+                                        }
+                                    >
+                                        <div class="w-full flex justify-center">
+                                            <Icon 
+                                                src={FaSolidForward} 
+                                                size="16" 
+                                                color={"black"}
+                                            />
+                                        </div>
+                                    </button>
+
+                                </div>
+
+
+                                <p class="mb-4 text-lg md:text-xl font-semibold">{highlightedCall.details()[detailsStepIndex].text}</p>
+                                {#if valueKeyframes}
+                                    <Value value={valueKeyframes[detailsKeyframeIndex]} capitalise={false}/>
+                                {/if}
+                            {:else}
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <h2 class="text-2xl font-bold text-gray-300">No details to show.</h2>
+                                </div>
+                            {/if}
+                        </div>
+                    {:else}
+                        <div class="w-full h-full flex items-center justify-center">
+                            <h2 class="text-2xl font-bold text-gray-300">No call selected</h2>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
+        </div>
+    </div>
+
 </div>
 
+
 <style>
-	input[type='range']::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 20px;
-		height: 20px;
-		background: white;
-		cursor: pointer;
-		box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
-		border: 4px solid black;
-		border-radius: 50%;
-		transform: translateY(-40%);
-	}
+    input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: white;
+        cursor: pointer;
+        box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
+        border: 4px solid black;
+        border-radius: 50%;
+        transform: translateY(-40%);
+    }
 
-	input[type='range']::-moz-range-thumb {
-		width: 20px;
-		height: 20px;
-		background: white;
-		cursor: pointer;
-		box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
-		border: 4px solid black;
-		border-radius: 50%;
-		transform: translateY(-40%);
-	}
+    input[type=range]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: white;
+        cursor: pointer;
+        box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
+        border: 4px solid black;
+        border-radius: 50%;
+        transform: translateY(-40%);
+    }
 
-	input[type='range']:hover::-webkit-slider-thumb {
-		outline: 4px solid #60a5fa;
-		transform: scale(1.05) translateY(-38%);
-	}
+    input[type=range]:hover::-webkit-slider-thumb {
+        outline: 4px solid #60a5fa;
+        transform: scale(1.05) translateY(-38%);
+    }
 
-	input[type='range']:active::-webkit-slider-thumb {
-		outline: 4px solid #60a5fa;
-		transform: scale(0.95) translateY(-42%);
-	}
+    input[type=range]:active::-webkit-slider-thumb {
+        outline: 4px solid #60a5fa;
+        transform: scale(0.95) translateY(-42%);
+    }
 
-	input[type='range']:hover::-moz-range-thumb {
-		outline: 4px solid #60a5fa;
-		transform: matrix(1.05, 0, 0, 1.05, 0, -38%);
-	}
+    input[type=range]:hover::-moz-range-thumb {
+        outline: 4px solid #60a5fa;
+        transform: matrix(1.05, 0, 0, 1.05, 0, -38%)
+    }
 
-	input[type='range']:active::-moz-range-thumb {
-		outline: 4px solid #60a5fa;
-		transform: matrix(0.95, 0, 0, 0.95, 0, -42%);
-	}
+    input[type=range]:active::-moz-range-thumb {
+        outline: 4px solid #60a5fa;
+        transform: matrix(0.95, 0, 0, 0.95, 0, -42%)
+    }
 
-	input[type='range']::-webkit-slider-runnable-track {
-		width: 100%;
-		height: 4px;
-		cursor: pointer;
-		animate: 0.2s;
-		box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
-		background: black;
-		border-radius: 1.3px;
-	}
+    input[type=range]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        animate: 0.2s;
+        box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
+        background: black;
+        border-radius: 1.3px;
+    }
 
-	input[type='range']::-moz-range-track {
-		width: 100%;
-		height: 4px;
-		cursor: pointer;
-		animate: 0.2s;
-		box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
-		background: black;
-		border-radius: 1.3px;
-	}
+    input[type=range]::-moz-range-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        animate: 0.2s;
+        box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
+        background: black;
+        border-radius: 1.3px;
+    }
 </style>

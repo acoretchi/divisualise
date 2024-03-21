@@ -1,174 +1,146 @@
-import { RecursiveCall, DivideCase, BaseCase } from '$lib/core/recursive_call';
-import type { CallDetails } from '$lib/core/recursive_call';
-import { NumberList, NumberValue } from '$lib/core/values';
+import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
+import type { CallDetails } from "$lib/core/recursive_call"
+import { NumberList, NumberValue } from "$lib/core/values"
 
 export interface MergeSortInput {
-	array: NumberList;
+    array: NumberList
 }
 
 export class MergeSortCall extends RecursiveCall<MergeSortInput, NumberList> {
-	constructor(input: MergeSortInput) {
-		super(input);
-		if (input.array.values.length === 0) {
-			throw new Error('Please enter at least one element.');
-		}
-	}
 
-	case(): DivideCase<MergeSortInput, NumberList> | BaseCase<MergeSortInput, NumberList> {
-		if (this.input().array.values.length <= 1) {
-			return new MergeSortBaseCase({
-				array: this.input().array
-			});
-		} else {
-			const middle = Math.floor(this.input().array.values.length / 2);
-			return new MergeCase(this.input(), {
-				Left: new MergeSortCall({
-					array: new NumberList(this.input().array.values.slice(0, middle)).copyDefault()
-				}),
-				Right: new MergeSortCall({
-					array: new NumberList(this.input().array.values.slice(middle)).copyDefault()
-				})
-			});
-		}
-	}
+    constructor(input: MergeSortInput) {
+        super(input)
+        if (input.array.values.length === 0) {
+            throw new Error("Please enter at least one element.")
+        }
+    }
 
-	undividedDetails(): CallDetails {
-		return [
-			{
-				text: 'We want to sort the array using Merge Sort.',
-				valueKeyframes: [
-					{
-						Array: new NumberList(this.input().array.values.map((v) => new NumberValue(v.value)))
-					}
-				]
-			}
-		];
-	}
+    case(): DivideCase<MergeSortInput, NumberList> | BaseCase<MergeSortInput, NumberList> {
+        if (this.input().array.values.length <= 1) {
+            return new MergeSortBaseCase({
+                array: this.input().array
+            })
+        } else {
+            const middle = Math.floor(this.input().array.values.length / 2)
+            return new MergeCase(this.input(), {
+                "Left": new MergeSortCall({
+                    array: new NumberList(this.input().array.values.slice(0, middle)).copyDefault()
+                }),
+                "Right": new MergeSortCall({
+                    array: new NumberList(this.input().array.values.slice(middle)).copyDefault()
+                })
+            })
+        }
+    }
+
+    undividedDetails(): CallDetails {
+        return [{
+            text: "We want to sort the array using Merge Sort.",
+            valueKeyframes: [{
+                "Array": new NumberList(this.input().array.values.map(v => new NumberValue(v.value)))
+            }]
+        }]
+    }
+
 }
 
 export class MergeCase extends DivideCase<MergeSortInput, NumberList> {
-	combine(): NumberList {
-		const left = this.calls()['Left'].result().values;
-		const right = this.calls()['Right'].result().values;
-		const result: NumberValue[] = [];
-		let i = 0;
-		let j = 0;
-		while (i < left.length && j < right.length) {
-			if (left[i].value < right[j].value) {
-				result.push(left[i]);
-				i++;
-			} else {
-				result.push(right[j]);
-				j++;
-			}
-		}
-		while (i < left.length) {
-			result.push(left[i]);
-			i++;
-		}
-		while (j < right.length) {
-			result.push(right[j]);
-			j++;
-		}
-		return new NumberList(result);
-	}
 
-	dividedDetails(_: MergeSortInput): CallDetails {
-		return [
-			{
-				text: `We split the array into two halves.`,
-				valueKeyframes: [
-					{
-						Left: new NumberList(
-							this.calls()
-								['Left'].input()
-								.array.values.map((v) => new NumberValue(v.value).coloured('blue'))
-						),
-						Right: new NumberList(
-							this.calls()
-								['Right'].input()
-								.array.values.map((v) => new NumberValue(v.value).coloured('red'))
-						)
-					}
-				]
-			}
-		];
-	}
+    combine(): NumberList {
+        const left = this.calls()["Left"].result().values
+        const right = this.calls()["Right"].result().values
+        const result: NumberValue[] = []
+        let i = 0
+        let j = 0
+        while (i < left.length && j < right.length) {
+            if (left[i].value < right[j].value) {
+                result.push(left[i])
+                i++
+            } else {
+                result.push(right[j])
+                j++
+            }
+        }
+        while (i < left.length) {
+            result.push(left[i])
+            i++
+        }
+        while (j < right.length) {
+            result.push(right[j])
+            j++
+        }
+        return new NumberList(result)
+    }
 
-	solvedDetails(_: MergeSortInput): CallDetails {
-		const left = this.calls()['Left'].result().values.slice();
-		const right = this.calls()['Right'].result().values.slice();
-		const merged: NumberValue[] = [];
-		const valueKeyframes = [
-			{
-				Merged: new NumberList([]),
-				Left: new NumberList(left.map((v) => new NumberValue(v.value).coloured('blue'))),
-				Right: new NumberList(right.map((v) => new NumberValue(v.value).coloured('red')))
-			}
-		];
-		while (left.length + right.length > 0) {
-			if (left.length > 0 && right.length > 0) {
-				if (left[0].value < right[0].value) {
-					merged.push(left[0]);
-					left.shift();
-				} else {
-					merged.push(right[0]);
-					right.shift();
-				}
-			} else if (left.length > 0) {
-				merged.push(left[0]);
-				left.shift();
-			} else {
-				merged.push(right[0]);
-				right.shift();
-			}
-			valueKeyframes.push({
-				Merged: new NumberList(merged.map((v) => new NumberValue(v.value).coloured('green'))),
-				Left: new NumberList(left.map((v) => new NumberValue(v.value).coloured('blue'))),
-				Right: new NumberList(right.map((v) => new NumberValue(v.value).coloured('red')))
-			});
-		}
-		return [
-			{
-				text: `We merge the two sorted halves in O(n) time.`,
-				valueKeyframes
-			}
-		];
-	}
+    dividedDetails(_: MergeSortInput): CallDetails {
+        return [{
+            text: `We split the array into two halves.`,
+            valueKeyframes: [{
+                "Left": new NumberList(this.calls()["Left"].input().array.values.map(v => new NumberValue(v.value).coloured("blue"))),
+                "Right": new NumberList(this.calls()["Right"].input().array.values.map(v => new NumberValue(v.value).coloured("red")))
+            }]
+        }]
+    }
+
+    solvedDetails(_: MergeSortInput): CallDetails {
+        const left = this.calls()["Left"].result().values.slice()
+        const right = this.calls()["Right"].result().values.slice()
+        const merged: NumberValue[] = []
+        const valueKeyframes = [{
+            "Merged": new NumberList([]),
+            "Left": new NumberList(left.map(v => new NumberValue(v.value).coloured("blue"))),
+            "Right": new NumberList(right.map(v => new NumberValue(v.value).coloured("red"))),
+        }]
+        while (left.length + right.length > 0) {
+            if (left.length > 0 && right.length > 0) {
+                if (left[0].value < right[0].value) {
+                    merged.push(left[0])
+                    left.shift()
+                } else {
+                    merged.push(right[0])
+                    right.shift()
+                }
+            } else if (left.length > 0) {
+                merged.push(left[0])
+                left.shift()
+            } else {
+                merged.push(right[0])
+                right.shift()
+            }
+            valueKeyframes.push({
+                "Merged": new NumberList(merged.map(v => new NumberValue(v.value).coloured("green"))),
+                "Left": new NumberList(left.map(v => new NumberValue(v.value).coloured("blue"))),
+                "Right": new NumberList(right.map(v => new NumberValue(v.value).coloured("red"))),
+            })
+        }
+        return [{
+            text: `We merge the two sorted halves in O(n) time.`,
+            valueKeyframes
+        }]
+    }
+
 }
 
 export class MergeSortBaseCase extends BaseCase<MergeSortInput, NumberList> {
-	solve(): NumberList {
-		return this.input().array;
-	}
+    solve(): NumberList {
+        return this.input().array
+    }
 
-	dividedDetails(input: MergeSortInput): CallDetails {
-		return [
-			{
-				text: `The array has only one element, so it is already sorted. This is our base case.`,
-				valueKeyframes: [
-					{
-						Array: new NumberList(
-							input.array.values.map((v) => new NumberValue(v.value).coloured('gray'))
-						)
-					}
-				]
-			}
-		];
-	}
+    dividedDetails(input: MergeSortInput): CallDetails {
+        return [{
+            text: `The array has only one element, so it is already sorted. This is our base case.`,
+            valueKeyframes: [{
+                "Array": new NumberList(input.array.values.map(v => new NumberValue(v.value).coloured("gray")))
+            }]
+        }]
+    }
 
-	solvedDetails(input: MergeSortInput): CallDetails {
-		return [
-			{
-				text: `We return the array.`,
-				valueKeyframes: [
-					{
-						Array: new NumberList(
-							input.array.values.map((v) => new NumberValue(v.value).coloured('gray'))
-						)
-					}
-				]
-			}
-		];
-	}
+    solvedDetails(input: MergeSortInput): CallDetails {
+        return [{
+            text: `We return the array.`,
+            valueKeyframes: [{
+                "Array": new NumberList(input.array.values.map(v => new NumberValue(v.value).coloured("gray")))
+            }]
+        }]
+    }
 }

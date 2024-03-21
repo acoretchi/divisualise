@@ -2,27 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /* Customizing the scrollbar to be flat and thin */
 ::-webkit-scrollbar {
-	width: 12px; /* Making the scrollbar thin */
-	background-color: transparent; /* Keeping the background transparent for a flat design */
+    width: 12px; /* Making the scrollbar thin */
+    background-color: transparent; /* Keeping the background transparent for a flat design */
 }
 
 /* Track of the scrollbar, kept minimal */
 ::-webkit-scrollbar-track {
-	background-color: transparent; /* Transparent track for a flat design */
+    background-color: transparent; /* Transparent track for a flat design */
 }
 
 /* Handle of the scrollbar using Tailwind's gray-200 */
 ::-webkit-scrollbar-thumb {
-	@apply bg-gray-300;
+    @apply bg-gray-300;
 }
 
 /* Handle of the scrollbar on hover, optionally darker for visibility */
 ::-webkit-scrollbar-thumb:hover {
-	@apply bg-gray-400;
+    @apply bg-gray-400;
 }
 
-body {
-	font-family: 'Nunito Variable', sans-serif;
+
+body { 
+    font-family: 'Nunito Variable', sans-serif;
 }

@@ -257,9 +257,11 @@
                     <!-- Lock camera -->
                     {#if lockCamera}
                         <button on:click={() => lockCamera = false}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black brightness-0 hover:scale-125 active:scale-75"
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-125 active:scale-75"
                         >
-                            <Icon src={HiSolidVideoCamera} size="16" color="black"/>
+                            <div class="brightness-0">
+                                <Icon src={HiSolidVideoCamera} size="16" color="black"/>
+                            </div>
                         </button>
                     {:else}
                         <button on:click={() => { lockCamera = true ; highlightedCall = highlightedCall }}
@@ -442,7 +444,7 @@
                                             || detailsStepIndex === 0 && detailsKeyframeIndex === 0
                                         
                                         )}
-                                        class:bg-gray-300={
+                                        class:bg-gray-400={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
@@ -475,7 +477,7 @@
                                             || detailsStepIndex === 0 && detailsKeyframeIndex === 0
                                         
                                         )}
-                                        class:bg-gray-300={
+                                        class:bg-gray-400={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
@@ -506,7 +508,7 @@
                                             || !keyframesPlaying
                                         
                                         )}
-                                        class:bg-gray-300={
+                                        class:bg-gray-400={
                                             playing
                                             || !detailsPlaying
                                             || !keyframesPlaying
@@ -536,7 +538,7 @@
                                             || detailsEnded && keyframesEnded
                                         
                                         )}
-                                        class:bg-gray-300={
+                                        class:bg-gray-400={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
@@ -569,7 +571,7 @@
                                             || keyframesPlaying
                                             || detailsEnded && keyframesEnded
                                         )}
-                                        class:bg-gray-300={
+                                        class:bg-gray-400={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
@@ -603,7 +605,7 @@
                                             || detailsEnded
                                             || detailsStepIndex === highlightedCall.details().length - 1
                                         )}
-                                        class:bg-gray-300={
+                                        class:bg-gray-400={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying

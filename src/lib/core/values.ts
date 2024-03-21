@@ -21,13 +21,15 @@ export class NumberValue {
     }
 
     coloured(colour: string): NumberValue {
-        this.colour = colour;
-        return this;
+        const copy = this.copy();
+        copy.colour = colour;
+        return copy;
     }
 
     struckThrough(struck: boolean): NumberValue {
-        this.struck = struck;
-        return this;
+        const copy = this.copy();
+        copy.struck = struck;
+        return copy;
     }
 }
 
@@ -48,8 +50,7 @@ export class NumberList {
     }
 
     coloured(colour: string): NumberList {
-        this.values.forEach(v => v.coloured(colour));
-        return this;
+        return new NumberList(this.values.map(v => v.coloured(colour)));
     }
 
 }

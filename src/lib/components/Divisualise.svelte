@@ -225,6 +225,9 @@
             minZoom: 0.1,
             bounds: false,
             zoomSpeed: 0.065,
+            onTouch: (e) => {
+                return false
+            },
         });
     });
     

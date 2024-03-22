@@ -288,10 +288,10 @@
                     </button>
                     <button 
                         on:click={play}
-                        disabled={playing || call.isSolved() && detailsEnded}
+                        disabled={playing || call.isSolved() && (detailsEnded || !showDetails || highlightedCall === null)}
                         class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-x-2 border-black hover:z-10 active:z-10"
-                        class:bg-white={!(playing || call.isSolved() && detailsEnded)}
-                        class:bg-gray-400={playing || call.isSolved() && detailsEnded}
+                        class:bg-white={!(playing || call.isSolved() && (detailsEnded || !showDetails || highlightedCall === null))}
+                        class:bg-gray-400={playing || call.isSolved() && (detailsEnded || !showDetails || highlightedCall === null)}
 
                     >
                         <Icon 
@@ -308,20 +308,20 @@
                             playing 
                             || detailsPlaying 
                             || keyframesPlaying 
-                            || call.isSolved() && detailsEnded
+                            || call.isSolved() && (detailsEnded || !showDetails || highlightedCall === null)
                         }
                         class="p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-l-2 border-black hover:z-10 active:z-10 rounded-r-full pr-2 md:pr-3"
                         class:bg-white={!(
                             playing 
                             || detailsPlaying 
                             || keyframesPlaying 
-                            || call.isSolved() && detailsEnded
+                            || call.isSolved() && (detailsEnded || !showDetails || highlightedCall === null)
                         )}
                         class:bg-gray-400={
                             playing 
                             || detailsPlaying 
                             || keyframesPlaying 
-                            || call.isSolved() && detailsEnded
+                            || call.isSolved() && (detailsEnded || !showDetails || highlightedCall === null)
                         }
                     >
                         <Icon 

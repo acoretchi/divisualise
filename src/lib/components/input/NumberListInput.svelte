@@ -2,54 +2,74 @@
     import { NumberList, NumberValue } from "$lib/core/values";
 
     export let value: NumberList = new NumberList([]);
-
-    let inputBuffer: string = "";
+    let inputBuffers: string[] = [""];
     let focusedIndex: number | null = null;
+    let inputElements: HTMLInputElement[] = [];
+    $: focusedBuffer = focusedIndex !== null ? inputBuffers[focusedIndex] : null
 
-    function onInput(event: unknown) {
-        const char = inputBuffer[inputBuffer.length - 1];
-        if (char === " " || char === ",") {
-            const number = parseFloat(inputBuffer);
+    function onInput(event: Event, index: number) {
+        if (focusedBuffer === null || focusedIndex === null) return;
+        const char = inputBuffers[index][inputBuffers[index].length - 1];
+        if (char === " " || char === "," || inputBuffers[index].length == 3 && inputBuffers[index][0] !== "-" || inputBuffers[index].length == 4) {
+            inputBuffers[index] = inputBuffers[index].slice(0, -1);
+            let number = parseFloat(inputBuffers[index]);
             if (!isNaN(number) && number >= -99 && number <= 99) {
-                if (focusedIndex === null) {
-                    value.values = [...value.values, new NumberValue(number)];
+                value.values.splice(index, 0, new NumberValue(number));
+                value = value;
+                if (index === inputBuffers.length - 1) {
+                    inputBuffers.push(char === "-" || !Number.isNaN(Number.parseInt(char)) ? char : "");
                 } else {
-                    value.values.splice(focusedIndex + 1, 0, new NumberValue(number));
-                    focusedIndex += 1;
+                    inputBuffers.splice(index+1, 0, char === "-" || !Number.isNaN(Number.parseInt(char)) ? char : "");
+                    focusIndex(index + 1);
                 }
+                inputBuffers = inputBuffers;
+                focusedIndex = index + 1;
             }
-            inputBuffer = "";
+            value = value;
         } else if (
             (isNaN(parseInt(char)) && char !== "-")
-            || (isNaN(parseInt(char)) && inputBuffer.length > 1)
-            || (inputBuffer.length > 2 && inputBuffer[0] !== "-") 
-            || inputBuffer.length > 3
+            || (isNaN(parseInt(char)) && inputBuffers[index].length > 1)
+            || (inputBuffers[index].length > 2 && inputBuffers[index][0] !== "-") 
+            || inputBuffers[index].length > 3
         ) {
-            inputBuffer = inputBuffer.slice(0, -1);
+            inputBuffers[index] = inputBuffers[index].slice(0, -1);
+            inputBuffers = inputBuffers;
         }
     }
 
-    function deleteOnBackspace(event: KeyboardEvent) {
-        if (inputBuffer.length === 0 && event.key === "Backspace") {
-            if (focusedIndex !== null) {
-                value.values = value.values.filter((_, i) => i !== focusedIndex);
-                focusedIndex = null;
+    function deleteOnBackspace(event: KeyboardEvent, index: number) {
+        if (inputBuffers[index].length === 0 && index != 0 && event.key === "Backspace") {
+            if (index === inputBuffers.length - 1) {
+                inputBuffers.splice(index, 1);
+                value.values.splice(index-1, 1);
             } else {
-                value.values = value.values.slice(0, -1);
+                inputBuffers.splice(index, 1);
+                value.values.splice(index, 1);
+                focusIndex(index - 1);
             }
+            focusedIndex = index - 1;
+            inputBuffers[focusedIndex] += " "
+            value = value;
+            inputBuffers = inputBuffers;
         }
     }
 
-    function valueKeydown(event: KeyboardEvent, index: number) {
-        if (event.key === "ArrowUp" && value.values[index].value < 99) {
-            value.values[index].value += 1;
-        } else if (event.key === "ArrowDown" && value.values[index].value > -99) {
-            value.values[index].value -= 1;
-        } else if (event.key === "Backspace" || event.key === "Delete") {
-            value.values = value.values.filter((_, i) => i !== index);
-            focusedIndex = null;
+    function focusIndex(index: number) {
+        focusedIndex = index;
+        let buffer = inputBuffers[index].slice()
+        let inputElement = inputElements[index];
+        inputElement.focus();
+        inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+        inputElement.onblur = () => {
+            if (isNaN(parseInt(inputBuffers[index]))) {
+                inputBuffers[index] = buffer;
+                value.values[index] = new NumberValue(parseInt(buffer));
+                value = value;
+            }
+            focusedIndex = null
         }
     }
+
 </script>
 
 <div class="flex flex-col mb-4">
@@ -58,11 +78,11 @@
         <div class="flex border-2 border-black mx-auto">
             {#each value.values as item, i}
                 <div class="flex h-16 md:h-20 aspect-square items-center justify-center border-2 border-black">
-                    <input type="text" readonly class="bg-white text-2xl md:text-4xl w-full h-full text-center border-none ring-0 outline-none" value={item.value} />
+                    <input type="text" class="bg-white text-2xl md:text-4xl w-full h-full text-center border-none ring-0 outline-none" bind:value={inputBuffers[i]} on:input={(event) => onInput(event, i)} on:keydown={(event) => deleteOnBackspace(event, i)} readonly on:click={() => {focusIndex(i)}} bind:this={inputElements[i]} />
                 </div>
             {/each}
             <div class="flex h-16 md:h-20 aspect-square items-center justify-center border-2 border-r-2 border-black">
-                <input type="text" class="bg-gray-300 text-2xl md:text-4xl w-full h-full text-center border-none ring-0 outline-none" bind:value={inputBuffer} on:input={onInput} on:keydown={deleteOnBackspace} on:click={() => {focusedIndex = null}} />
+                <input type="text" class="text-gray-800 bg-gray-400 text-2xl md:text-4xl w-full h-full text-center border-none ring-0 outline-none" bind:value={inputBuffers[inputBuffers.length - 1]} on:input={(event) => onInput(event, inputBuffers.length - 1)} on:keydown={(event) => deleteOnBackspace(event, inputBuffers.length - 1)} on:click={() => {focusedIndex = inputBuffers.length - 1}} />
             </div>
         </div>
     </div>

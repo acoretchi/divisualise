@@ -226,7 +226,7 @@
                         on:click={resetCall}
                         disabled={!call.isDivided() || playing}
                         class="rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:outline hover:outline-blue-400 hover:outline-2"
-                        class:bg-white={call.isDivided() || playing}
+                        class:bg-white={call.isDivided() && !playing}
                         class:bg-gray-400={!call.isDivided() || playing}
                     >
                         <Icon src={ImCross} size="16" color={call.isDivided() ? "#9ca3af" : "black"}/>
@@ -384,7 +384,7 @@
                 class="md:h-full cursor-pointer"
                 on:click={() => showDetails = !showDetails}
             >
-                <div class="p-4 transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}">
+                <div class="w-full p-4 transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}">
                     <Icon src={FaSolidChevronLeft} size="24" />
                 </div>
             </button>

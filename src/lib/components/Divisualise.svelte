@@ -377,7 +377,7 @@
         class:overflow-y-hidden={!showDetails}
         class:overflow-y-auto={showDetails}
     >
-        <div class="flex flex-col w-full md:h-full md:flex-row items-center {showDetails ? 'h-full' : 'h-20'}">
+        <div class="flex flex-col w-full md:h-full md:flex-row items-center md:items-start {showDetails ? 'h-full' : 'h-20'}">
 
             <!-- Open / Close -->
             <div 

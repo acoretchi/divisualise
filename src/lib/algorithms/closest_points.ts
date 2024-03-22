@@ -12,7 +12,6 @@ export class ClosestPointsCall extends RecursiveCall<ClosestPointsInput, Points>
     
     case(): DivideCase<ClosestPointsInput, Points> | BaseCase<ClosestPointsInput, Points> {
         const points = this.input().points.copy().points.sort((a, b) => a.x - b.x)
-        console.log(points)
         if (points.length <= 3) {
             return new ClosestPointsBaseCase({ points: new Points(points) })
         } else {

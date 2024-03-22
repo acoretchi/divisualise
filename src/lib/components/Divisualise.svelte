@@ -32,9 +32,9 @@
     let detailsPlaying = false
     let keyframesPlaying = false
     let playing = false
-    let showDetails = true
+    let showDetails = false
     let lockCamera = true
-    let playbackSpeed = 1
+    let playbackSpeed = 2
 
     // When the highlighted call changes, move to the start of the details
     $: if (highlightedCall !== null) {
@@ -84,7 +84,7 @@
             keyframesPlaying = true;
             while (!keyframesEnded && keyframesPlaying) {
                 stepKeyframes();
-                await new Promise(resolve => setTimeout(resolve, 200 / playbackSpeed))
+                await new Promise(resolve => setTimeout(resolve, 500 / playbackSpeed))
             }
             keyframesPlaying = false;
         }
@@ -113,31 +113,9 @@
             detailsPlaying = true;
             while (!detailsEnded && detailsPlaying) {
                 await stepDetails();
-                await new Promise(resolve => setTimeout(resolve, 800 / playbackSpeed))
+                await new Promise(resolve => setTimeout(resolve, 4000 / playbackSpeed))
             }
             detailsPlaying = false;
-        }
-    }
-
-    function stepDetailsOrKeyframes() {
-        if (highlightedCall !== null) {
-            if (valueKeyframes && !keyframesEnded) {
-                stepKeyframes()
-            }
-            else if (!detailsEnded) {
-                stepDetails()
-            }
-        }
-    }
-
-    function stepBackDetailsOrKeyframes() {
-        if (highlightedCall !== null) {
-            if (valueKeyframes && detailsKeyframeIndex > 0) {
-                stepBackKeyframes()
-            }
-            else if (detailsStepIndex > 0) {
-                stepBackDetails()
-            }
         }
     }
 
@@ -185,7 +163,7 @@
         playing = true;
         while (!call.isSolved() && playing || (!detailsEnded && showDetails)) {
             await step()
-            await new Promise(resolve => setTimeout(resolve, 800 / playbackSpeed))
+            await new Promise(resolve => setTimeout(resolve, 2000 / playbackSpeed))
         }
         playing = false;
     }
@@ -265,9 +243,11 @@
                         </button>
                     {:else}
                         <button on:click={() => { lockCamera = true ; highlightedCall = highlightedCall }}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black brightness-0 hover:scale-125 active:scale-75"
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-110"
                         >
-                            <Icon src={HiOutlineVideoCamera} size="16" color="black"/>
+                            <div class="brightness-0">
+                                <Icon src={HiOutlineVideoCamera} size="16" color="black"/>
+                            </div>
                         </button>
                     {/if}
                 </div>
@@ -357,8 +337,8 @@
                 <input 
                     id="playback-speed"
                     type="range" 
-                    min="0.5" 
-                    max="2" 
+                    min="1" 
+                    max="5" 
                     step="0.01"
                     bind:value={playbackSpeed} 
                     class="cursor-pointer appearance-none bg-transparent"
@@ -370,12 +350,11 @@
         <!-- Header -->
         <div class="flex p-3 md:p-4 z-50">
             <h1 class="text-3xl font-bold cursor-pointer" on:click={() => dispatch("reset")}>Divisualise!</h1>
-
         </div>
 
         <!-- Main -->
         <div class="flex grow w-full h-full justify-center">
-            <div class="flex flex-col w-full h-full items-center pt-[20%] touch-none" bind:this={container}>
+            <div class="flex flex-col w-full h-full items-center pt-[20%] touch-none outline-none" bind:this={container}>
                 <!-- Show the call -->
                 <RecursiveCallComponent
                     bind:this={callComponent} 
@@ -394,11 +373,11 @@
     </div>
 
     <!-- Details -->
-    <div class="flex flex-col h-fit md:h-full max-w-1/2 bg-white drop-shadow-2xl border-t-4 md:border-l-4 md:border-t-0 border-black grow-0 transition-all duration-200 ease-in-out transform {showDetails ? 'h-4/5 md:h-full md:w-[60rem]' : 'h-12 md:w-[4rem]'}"
+    <div class="flex flex-col md:h-full max-w-1/2 bg-white drop-shadow-2xl border-t-4 md:border-l-4 md:border-t-0 border-black grow-0 transition-all duration-200 ease-in-out transform max-h-[40vh] md:max-h-full {showDetails ? 'h-full md:h-full md:w-[60rem]' : 'h-20 md:w-[4rem]'}"
         class:overflow-y-hidden={!showDetails}
         class:overflow-y-auto={showDetails}
     >
-        <div class="flex flex-col w-full md:h-full md:flex-row ">
+        <div class="flex flex-col w-full md:h-full md:flex-row {showDetails ? 'h-full' : 'h-20'}">
 
             <!-- Open / Close -->
             <div 
@@ -407,7 +386,7 @@
                 aria-disabled
             >
                 <button 
-                    class="p-2 md:p-4 mb-2 transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}"
+                    class="p-4 transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}"
                 >
                     <Icon src={FaSolidChevronLeft} size="24" />
                 </button>
@@ -415,10 +394,9 @@
 
             <!-- Body -->
             {#if showDetails}
-                <div class="pb-2 md:py-4 px-4 md:pl-0 md:pr-8 w-full max-w-full overflow-auto" in:fade={{ duration: 400 }} out:fade={{ duration: 200 }}>
+                <div class="pb-2 md:py-4 px-4 md:pl-0 md:pr-8 w-full max-w-full">
                     {#if highlightedCall !== null}
                         <div class="flex flex-col">
-                            <h2 class="text-2xl md:text-3xl font-bold mb-2 md:mt-1">{algorithmName}</h2>
 
                             <!-- Details controls -->
                             {#if highlightedCall.details().length >= 1}
@@ -434,21 +412,21 @@
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                            || detailsStepIndex === 0
                                         }
                                         class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-r-2 border-black rounded-l-full hover:z-10 active:z-10 pl-3"
                                         class:bg-white={!(
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                            || detailsStepIndex === 0
                                         
                                         )}
                                         class:bg-gray-400={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                            || detailsStepIndex === 0
                                         }
                                     >
                                         <div class="w-full flex justify-center">
@@ -462,26 +440,26 @@
                                     
                                     <!-- Step back -->
                                     <button 
-                                        on:click={stepBackDetailsOrKeyframes}
+                                        on:click={stepBackKeyframes}
                                         disabled={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                            || detailsKeyframeIndex === 0
                                         }
                                         class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:z-10 active:z-10"
                                         class:bg-white={!(
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                            || detailsKeyframeIndex === 0
                                         
                                         )}
                                         class:bg-gray-400={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsStepIndex === 0 && detailsKeyframeIndex === 0
+                                            || detailsKeyframeIndex === 0
                                         }
                                     >
                                         <div class="w-full flex justify-center">
@@ -557,25 +535,25 @@
 
                                     <!-- Step forward -->
                                     <button 
-                                        on:click={stepDetailsOrKeyframes}
+                                        on:click={stepKeyframes}
                                         disabled={(
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsEnded && keyframesEnded
+                                            ||  keyframesEnded
                                         )}
                                         class="w-full p-1.5 md:p-2 cursor-pointer border-4 border-x-2 border-black hover:z-10 active:z-10"
                                         class:bg-white={!(
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsEnded && keyframesEnded
+                                            || keyframesEnded
                                         )}
                                         class:bg-gray-400={
                                             playing
                                             || detailsPlaying
                                             || keyframesPlaying
-                                            || detailsEnded && keyframesEnded
+                                            || keyframesEnded
                                         }
                                     >
                                         <div class="w-full flex justify-center">

@@ -247,7 +247,7 @@
                     <button 
                         on:click={resetCall}
                         disabled={!call.isDivided() || playing}
-                        class="rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-125 active:scale-75"
+                        class="rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:outline hover:outline-blue-400 hover:outline-2"
                         class:bg-white={call.isDivided() || playing}
                         class:bg-gray-400={!call.isDivided() || playing}
                     >
@@ -257,7 +257,7 @@
                     <!-- Lock camera -->
                     {#if lockCamera}
                         <button on:click={() => lockCamera = false}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-125 active:scale-75"
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:outline hover:outline-blue-400 hover:outline-2"
                         >
                             <div class="brightness-0">
                                 <Icon src={HiSolidVideoCamera} size="16" color="black"/>
@@ -275,7 +275,7 @@
 
             <div class="flex w-full md:w-fit justify-between md:justify-start md:space-x-8 items-center">
                 <!-- Playback -->
-                <div class="flex">
+                <div class="flex rounded-full hover:outline hover:outline-blue-400 hover:outline-2">
                     
                     <!-- Step back -->
                     <button 
@@ -425,7 +425,7 @@
 
 
                                 <!-- Playback -->
-                                <div class="flex w-full justify-center mb-4">
+                                <div class="flex rounded-full w-full justify-center mb-2 md:mb-4 hover:outline hover:outline-blue-400 hover:outline-2">
 
                                     <!-- Step back details -->
                                     <button 
@@ -674,22 +674,22 @@
     }
 
     input[type=range]:hover::-webkit-slider-thumb {
-        outline: 4px solid #60a5fa;
+        outline: 2px solid #60a5fa;
         transform: scale(1.05) translateY(-38%);
     }
 
     input[type=range]:active::-webkit-slider-thumb {
-        outline: 4px solid #60a5fa;
+        outline: 2px solid #60a5fa;
         transform: scale(0.95) translateY(-42%);
     }
 
     input[type=range]:hover::-moz-range-thumb {
-        outline: 4px solid #60a5fa;
+        outline: 2px solid #60a5fa;
         transform: matrix(1.05, 0, 0, 1.05, 0, -38%)
     }
 
     input[type=range]:active::-moz-range-thumb {
-        outline: 4px solid #60a5fa;
+        outline: 2px solid #60a5fa;
         transform: matrix(0.95, 0, 0, 0.95, 0, -42%)
     }
 

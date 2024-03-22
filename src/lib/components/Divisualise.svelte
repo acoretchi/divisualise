@@ -226,7 +226,7 @@
             bounds: false,
             zoomSpeed: 0.065,
             onTouch: (e) => {
-                return false
+                e.preventDefault()
             },
         });
     });

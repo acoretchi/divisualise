@@ -2,7 +2,7 @@
 // styling information for display in the visualisation.
 
 export class NumberValue {
-    value: number | null
+    value: number;
     colour: string = "black";
     struck: boolean = false;
 

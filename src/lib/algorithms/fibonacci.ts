@@ -104,7 +104,7 @@ export class FibBaseCase extends BaseCase<FibonacciInput, NumberValue> {
         return [{
             text: `${n} is less than or equal to 2. This is our base case.`,
             valueKeyframes: [{
-                "n": new NumberValue(n)
+                "N": new NumberValue(n)
             }]
         }]
     }
@@ -114,7 +114,7 @@ export class FibBaseCase extends BaseCase<FibonacciInput, NumberValue> {
         return [{
             text: `We return 1.`,
             valueKeyframes: [{
-                "result": new NumberValue(1)
+                "Result": new NumberValue(1)
             }]
         }]
     }

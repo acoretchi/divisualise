@@ -226,7 +226,7 @@
             bounds: false,
             zoomSpeed: 0.065,
             onTouch: (e) => {
-                e.preventDefault()
+                return false
             },
         });
     });
@@ -375,7 +375,7 @@
 
         <!-- Main -->
         <div class="flex grow w-full h-full justify-center">
-            <div class="flex flex-col w-full h-full items-center pt-[20%]" bind:this={container}>
+            <div class="flex flex-col w-full h-full items-center pt-[20%] touch-none" bind:this={container}>
                 <!-- Show the call -->
                 <RecursiveCallComponent
                     bind:this={callComponent} 

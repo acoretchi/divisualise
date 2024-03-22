@@ -377,7 +377,7 @@
         class:overflow-y-hidden={!showDetails}
         class:overflow-y-auto={showDetails}
     >
-        <div class="flex flex-col w-full md:h-full md:flex-row items-center md:items-start {showDetails ? 'h-full' : 'h-20'}">
+        <div class="flex flex-col w-full md:h-full md:flex-row {showDetails ? 'h-full' : 'h-20'}">
 
             <!-- Open / Close -->
             <div 
@@ -394,7 +394,7 @@
 
             <!-- Body -->
             {#if showDetails}
-                <div class="pb-2 md:py-4 px-4 md:pl-0 md:pr-8 w-full max-w-full">
+                <div class="pb-2 md:py-4 px-4 md:pl-0 md:pr-8 w-full max-w-full overflow-x-auto">
                     {#if highlightedCall !== null}
                         <div class="flex flex-col">
 

@@ -1,67 +1,103 @@
+import { NumberValue, NumberList, Matrix, Points } from "$lib/core/values"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// We define some types for working with the input and output of recursive calls.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export type IOValue = NumberValue | NumberList | Matrix | Points
+
+export type IOValueObject<T> = {
+    [K in keyof T]: T[K] extends IOValue ? T[K] : never;
+};
+
+export type NamedIOValues = Record<string, IOValue>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // We define the state of a recursive call as one of the following:
 // 1. Undivided: The call has not been divided into sub-calls.
 // 2. Divided: The call has been divided into sub-calls, but the sub-calls have not been evaluated.
 // 3. Solved: The call has been divided into sub-calls which have been evaluated and combined
 //    to produce the solution.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export interface UndividedState {
     type: "undivided"
 }
 
-export interface DividedState<In, Out> {
+export interface DividedState<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>
+> {
     type: "divided"
-    case: DivideCase<In, Out> | BaseCase<In, Out>
+    case: RecursiveCase<In, Out>
 }
 
-export interface SolvedState<In, Out> {
+export interface SolvedState<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>
+> {
     type: "solved"
-    case: DivideCase<In, Out> | BaseCase<In, Out>
+    case: RecursiveCase<In, Out>
     result: Out
 }
 
-export type RecursiveCallState<In, Out> = UndividedState | DividedState<In, Out> | SolvedState<In, Out>
+export type RecursiveCallState<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>>
+= UndividedState | DividedState<In, Out> | SolvedState<In, Out>
 
-export type RecursiveCalls<In, Out> = Record<string, RecursiveCall<In, Out>>
+export type RecursiveCalls<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>
+> = Record<string, RecursiveCall<In, Out>>
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // We define a way to configure an algorithm for use on the frontend.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export type InputType = "Number" | "NumberList" | "Matrix" | "Points"
 
 export type IconType = "Maths" | "Sort" | "Search" | "Matrix" | "Points" | "Array" | "Divide"
 
-export interface AlgorithmConfig {
+export interface AlgorithmConfig<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>
+> {
     name: string
     icon: IconType
-    callConstructor: typeof RecursiveCall<unknown, unknown>
+    callConstructor: typeof RecursiveCall<In, Out>
     inputs: Record<string, InputType>
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // We define some types for working with details on the frontend. So each call detail can have multiple
 // steps with values animated by keyframe.
-
-export interface ValueKeyframe {
-    type: InputType
-    value: unknown
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 export interface CallDetailsStep {
     text: string
-    valueKeyframes?: Record<string, unknown>[]
+    valueKeyframes?: Record<string, IOValue>[]
     highlightedCalls?: string[]
 }
 
 export type CallDetails = CallDetailsStep[]
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // An instance of RecursiveCall can be thought of as a node in a 'call tree'.
 // This is conceptually different to a 'call stack' as we don't enforce an ordering
 // on execution, allowing the user to explore the tree call by call.
 //
 // The main method of interest is 'case'. This method must return a RecursiveCase
 // which represents the collection of sub-calls that must be made to solve the problem.
-export abstract class RecursiveCall<In, Out> {
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export abstract class RecursiveCall<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>
+> {
     _input: In
     _state: RecursiveCallState<In, Out>
     
@@ -71,7 +107,7 @@ export abstract class RecursiveCall<In, Out> {
     }
 
     // Given the input to the call, return the appropriate RecursiveCase.
-    abstract case(): DivideCase<In, Out> | BaseCase<In, Out>
+    abstract case(): RecursiveCase<In, Out>
 
     // Return the details for the undivided state.
     abstract undividedDetails(): CallDetails
@@ -173,18 +209,6 @@ export abstract class RecursiveCall<In, Out> {
         }
     }
 
-    containsSubcall(call: RecursiveCall<In, Out>): boolean {
-        if (this === call) {
-            return true
-        }
-        else if (this._state.type === "divided") {
-            return Object.values(this._state.case.calls()).some(subcall => subcall === call || subcall.containsSubcall(call))
-        }
-        else {
-            return false
-        }
-    }
-
     // Unsolve the call, setting its state to 'divided'.
     unsolve() {
         if (this._state.type === "solved") {
@@ -238,8 +262,16 @@ export abstract class RecursiveCall<In, Out> {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// We define two types of recursive cases:
+// 1. DivideCase: A case that must be divided into sub-calls to solve the problem.
+// 2. BaseCase: A case that is a base case and can be solved directly.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export abstract class RecursiveCase<In, Out> {
+export abstract class RecursiveCase<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>
+> {
     _result: Out | null = null
 
     // Return the solution to the case.
@@ -275,19 +307,24 @@ export abstract class RecursiveCase<In, Out> {
 }
 
 
-export abstract class DivideCase<In, Out> extends RecursiveCase<In, Out> {
+export abstract class DivideCase<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>
+> extends RecursiveCase<In, Out> {
     _input: In
     _subcalls: RecursiveCalls<In, Out>
 
-    constructor (input: In, subcalls: RecursiveCalls<In, Out>) {
+    constructor (input: In) {
         super()
         this._input = input
-        this._subcalls = subcalls
+        this._subcalls = this.divide(input)
     }
+
+    // Divide the case into sub-calls.
+    abstract divide(input: In): RecursiveCalls<In, Out>
 
     // Combine the results of the sub-calls to solve the problem.
     abstract combine(): Out
-
 
     // Return the solution to the case by calling 'result' on each of the sub-calls
     // and combining the results appropriately.
@@ -340,19 +377,19 @@ export abstract class DivideCase<In, Out> extends RecursiveCase<In, Out> {
 }
 
 
-export abstract class BaseCase<In, Out> extends RecursiveCase<In, Out> {
+export abstract class BaseCase<
+    In extends IOValueObject<In>,
+    Out extends IOValue | IOValueObject<Out>
+> extends RecursiveCase<In, Out> {
     _input: In
     _result: Out | null = null
-
 
     constructor (input: In) {
         super()
         this._input = input
     }
 
-
     abstract solve(): Out
-
 
     result(): Out {
         if (this._result === null) {

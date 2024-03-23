@@ -1,5 +1,5 @@
 import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
-import type { CallDetails } from "$lib/core/recursive_call"
+import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { NumberList, NumberValue } from "$lib/core/values"
 
 
@@ -22,15 +22,10 @@ export class MaximalSubarrayCall extends RecursiveCall<MaximalSubarrayInput, Num
 
     case(): DivideCase<MaximalSubarrayInput, NumberList> | BaseCase<MaximalSubarrayInput, NumberList> {
         const array = this.input().array
-
         if (array.values.length === 1) {
             return new MaximalSubarrayBaseCase(this.input())
         } else {
-            const mid = Math.floor(array.values.length / 2)
-            return new MaximalSubarrayDivideCase(this.input(), {
-                "Left": new MaximalSubarrayCall({ array: new NumberList(array.values.slice(0, mid)) }),
-                "Right": new MaximalSubarrayCall({ array: new NumberList(array.values.slice(mid)) }),
-            })
+            return new MaximalSubarrayDivideCase(this.input())
         }
     }
 
@@ -46,6 +41,14 @@ export class MaximalSubarrayCall extends RecursiveCall<MaximalSubarrayInput, Num
 }
 
 export class MaximalSubarrayDivideCase extends DivideCase<MaximalSubarrayInput, NumberList> {
+
+    divide(input: MaximalSubarrayInput): RecursiveCalls<MaximalSubarrayInput, NumberList> {
+        const mid = Math.floor(input.array.values.length / 2)
+        return {
+            "Left": new MaximalSubarrayCall({ array: new NumberList(input.array.values.slice(0, mid)) }),
+            "Right": new MaximalSubarrayCall({ array: new NumberList(input.array.values.slice(mid)) }),
+        }
+    }
 
     combine(): NumberList {
         const array = this.input().array.copy().values

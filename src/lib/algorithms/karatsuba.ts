@@ -1,5 +1,5 @@
 import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
-import type { CallDetails } from "$lib/core/recursive_call"
+import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { NumberValue } from "$lib/core/values"
 
 
@@ -27,24 +27,10 @@ export class KaratsubaCall extends RecursiveCall<KaratsubaInput, NumberValue> {
     case(): DivideCase<KaratsubaInput, NumberValue> | BaseCase<KaratsubaInput, NumberValue> {
         const x = this.input().x.value
         const y = this.input().y.value
-
         if (x < 10 || y < 10) {
             return new KaratsubaBaseCase(this.input())
         } else {
-            const n = Math.max(Math.floor(Math.log10(x)) + 1, Math.floor(Math.log10(y)) + 1)
-            const half = Math.floor(n / 2)
-            const divisor = Math.pow(10, half)
-
-            const a = Math.floor(x / divisor)
-            const b = x % divisor
-            const c = Math.floor(y / divisor)
-            const d = y % divisor
-
-            return new KaratsubaDivideCase(this.input(), {
-                "ac": new KaratsubaCall({ x: new NumberValue(a), y: new NumberValue(c) }),
-                "bd": new KaratsubaCall({ x: new NumberValue(b), y: new NumberValue(d) }),
-                "(a+b)(c+d)": new KaratsubaCall({ x: new NumberValue(a + b), y: new NumberValue(c + d) }),
-            })
+            return new KaratsubaDivideCase(this.input())
         }
     }
 
@@ -62,6 +48,23 @@ export class KaratsubaCall extends RecursiveCall<KaratsubaInput, NumberValue> {
 
 
 export class KaratsubaDivideCase extends DivideCase<KaratsubaInput, NumberValue> {
+
+    divide(input: KaratsubaInput): RecursiveCalls<KaratsubaInput, NumberValue> {
+        const n = Math.max(Math.floor(Math.log10(input.x.value)) + 1, Math.floor(Math.log10(input.y.value)) + 1)
+        const half = Math.floor(n / 2)
+        const divisor = Math.pow(10, half)
+
+        const a = Math.floor(input.x.value / divisor)
+        const b = input.x.value % divisor
+        const c = Math.floor(input.y.value / divisor)
+        const d = input.y.value % divisor
+
+        return {
+            "ac": new KaratsubaCall({ x: new NumberValue(a), y: new NumberValue(c) }),
+            "bd": new KaratsubaCall({ x: new NumberValue(b), y: new NumberValue(d) }),
+            "(a+b)(c+d)": new KaratsubaCall({ x: new NumberValue(a + b), y: new NumberValue(c + d) })
+        }
+    }
 
     combine(): NumberValue {
         const ac = this.calls()["ac"].result()

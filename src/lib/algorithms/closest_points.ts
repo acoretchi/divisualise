@@ -1,5 +1,5 @@
 import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
-import type { CallDetails } from "$lib/core/recursive_call"
+import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { Points, Point, Line } from "$lib/core/values"
 
 
@@ -15,15 +15,7 @@ export class ClosestPointsCall extends RecursiveCall<ClosestPointsInput, Points>
         if (points.length <= 3) {
             return new ClosestPointsBaseCase({ points: new Points(points) })
         } else {
-            const midX = points[Math.floor(points.length / 2)].x
-            return new ClosestPointsDivideCase({ points: new Points(points) }, {
-                "Left": new ClosestPointsCall({
-                    points: new Points(points.slice().filter(p => p.x <= midX))
-                }),
-                "Right": new ClosestPointsCall({
-                    points: new Points(points.slice().filter(p => p.x > midX))
-                })
-            })
+            return new ClosestPointsDivideCase(this.input())
         }
     }
 
@@ -39,6 +31,19 @@ export class ClosestPointsCall extends RecursiveCall<ClosestPointsInput, Points>
 }
 
 export class ClosestPointsDivideCase extends DivideCase<ClosestPointsInput, Points> {
+
+    divide(input: ClosestPointsInput): RecursiveCalls<ClosestPointsInput, Points> {
+        const points = input.points.copy().points.sort((a, b) => a.x - b.x)
+        const midX = points[Math.floor(points.length / 2)].x
+        return {
+            "Left": new ClosestPointsCall({
+                points: new Points(points.slice().filter(p => p.x <= midX))
+            }),
+            "Right": new ClosestPointsCall({
+                points: new Points(points.slice().filter(p => p.x > midX))
+            })
+        }
+    }
 
     combine(): Points {
         const points = this.input().points.copy().points

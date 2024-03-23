@@ -1,5 +1,5 @@
 import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
-import type { CallDetails } from "$lib/core/recursive_call"
+import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { NumberValue } from "$lib/core/values"
 
 
@@ -25,14 +25,7 @@ export class FibonacciCall extends RecursiveCall<FibonacciInput, NumberValue> {
                 n: this.input().n
             })
         } else {
-            return new SumCase({ n: this.input().n }, {
-                "First Summand": new FibonacciCall({
-                    n: new NumberValue(this.input().n.value - 1)
-                }),
-                "Second Summand": new FibonacciCall({
-                    n: new NumberValue(this.input().n.value - 2)
-                })
-            })
+            return new SumCase(this.input())
         }
     }
 
@@ -60,6 +53,13 @@ export class FibonacciCall extends RecursiveCall<FibonacciInput, NumberValue> {
 
 
 export class SumCase extends DivideCase<FibonacciInput, NumberValue> {
+
+    divide(input: FibonacciInput): RecursiveCalls<FibonacciInput, NumberValue> {
+        return {
+            "First Summand": new FibonacciCall({ n: new NumberValue(input.n.value - 1) }),
+            "Second Summand": new FibonacciCall({ n: new NumberValue(input.n.value - 2) })
+        }
+    }
 
     combine(): NumberValue {
         return new NumberValue(this.calls()["First Summand"].result().value + this.calls()["Second Summand"].result().value)

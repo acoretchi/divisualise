@@ -1,5 +1,5 @@
 import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
-import type { CallDetails } from "$lib/core/recursive_call"
+import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { NumberList, NumberValue } from "$lib/core/values"
 
 export interface MergeSortInput {
@@ -21,15 +21,7 @@ export class MergeSortCall extends RecursiveCall<MergeSortInput, NumberList> {
                 array: this.input().array
             })
         } else {
-            const middle = Math.floor(this.input().array.values.length / 2)
-            return new MergeCase(this.input(), {
-                "Left": new MergeSortCall({
-                    array: new NumberList(this.input().array.values.slice(0, middle)).copyDefault()
-                }),
-                "Right": new MergeSortCall({
-                    array: new NumberList(this.input().array.values.slice(middle)).copyDefault()
-                })
-            })
+            return new MergeCase(this.input())
         }
     }
 
@@ -45,6 +37,19 @@ export class MergeSortCall extends RecursiveCall<MergeSortInput, NumberList> {
 }
 
 export class MergeCase extends DivideCase<MergeSortInput, NumberList> {
+
+    divide(input: MergeSortInput): RecursiveCalls<MergeSortInput, NumberList> {
+        const array = input.array.values
+        const mid = Math.floor(array.length / 2)
+        return {
+            "Left": new MergeSortCall({
+                array: new NumberList(array.slice(0, mid))
+            }),
+            "Right": new MergeSortCall({
+                array: new NumberList(array.slice(mid))
+            })
+        }
+    }
 
     combine(): NumberList {
         const left = this.calls()["Left"].result().values

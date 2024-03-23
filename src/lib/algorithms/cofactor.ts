@@ -1,5 +1,5 @@
 import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
-import type { CallDetails } from "$lib/core/recursive_call"
+import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { Matrix, NumberValue } from "$lib/core/values"
 
 
@@ -25,7 +25,7 @@ export class CofactorExpansionCall extends RecursiveCall<CofactorExpansionInput,
         if (matrix.matrix.length === 2) {
             return new CofactorExpansionBaseCase(this.input())
         } else {
-            return new CofactorExpansionDivideCase(this.input(), generateCofactorCalls(matrix))
+            return new CofactorExpansionDivideCase(this.input())
         }
     }
 
@@ -41,6 +41,10 @@ export class CofactorExpansionCall extends RecursiveCall<CofactorExpansionInput,
 }
 
 export class CofactorExpansionDivideCase extends DivideCase<CofactorExpansionInput, NumberValue> {
+
+    divide(input: CofactorExpansionInput): RecursiveCalls<CofactorExpansionInput, NumberValue> {
+        return generateCofactorCalls(input.matrix)
+    }
 
     combine(): NumberValue {
         let determinant = new NumberValue(0)

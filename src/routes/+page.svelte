@@ -53,6 +53,7 @@
         selectedAlgorithm = null
         input = null
         call = null
+        inputError = null
     }
 
 </script>

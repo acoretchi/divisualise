@@ -9,6 +9,7 @@ import { ClosestPointsCall } from "$lib/algorithms/closest_points"
 import { StrassenCall } from "$lib/algorithms/strassen"
 import { CofactorExpansionCall } from "$lib/algorithms/cofactor"
 import { MaximalSubarrayCall } from "$lib/algorithms/maximum_subarray"
+import { LCSCall } from "$lib/algorithms/longest_common_subsequence"
 import type { AlgorithmConfig } from "$lib/core/recursive_call"
 
 export type { InputType,  AlgorithmConfig } from "$lib/core/recursive_call"
@@ -48,6 +49,15 @@ export const ALGORITHMS: AlgorithmConfig<
         callConstructor: MaximalSubarrayCall,
         inputs: {
             "array": "NumberList"
+        }
+    },
+    {
+        name: "Longest Common Subsequence",
+        icon: "Array",
+        callConstructor: LCSCall,
+        inputs: {
+            "first": "NumberList",
+            "second": "NumberList"
         }
     },
     { 

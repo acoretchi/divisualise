@@ -491,18 +491,35 @@ export abstract class RecursiveCall<
     }
 
 
-    // Return the last call to be acted on in the call tree as if we were solving it in order.
-    lastActedUpon(): RecursiveCall<In, Out> | null {
-        if (this._state.type === "solved" || this._state.type === "memoised") {
+    // Return the next call to be acted on in the call tree.
+    next(): RecursiveCall<In, Out> | null {
+        if (this.isDivisible()) {
+            return this
+        }
+        else if (this._state.type === "divided") {
+            for (const subcall of Object.values(this._state.case.calls())) {
+                if (!subcall.isSolved()) {
+                    return subcall.next()
+                }
+            }
+            return this
+        }
+        else {
+            return null
+        }
+    }
+
+    // Return the next call to be reversed in the call tree by traversing the calls in reverse order.
+    previous(): RecursiveCall<In, Out> | null {
+        if (this.isSolved()) {
             return this
         }
         else if (this._state.type === "divided") {
             for (const subcall of Object.values(this._state.case.calls()).reverse()) {
                 if (subcall.isDivided() || subcall.isMemoised()) {
-                    return subcall.lastActedUpon()
+                    return subcall.previous()
                 }
             }
-            // All subcalls unsolved
             return this
         }
         else {

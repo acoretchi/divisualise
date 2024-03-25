@@ -25,20 +25,22 @@
     import type { RecursiveCall, IOValue, IOValueObject } from "$lib/core/recursive_call"
 
 
-    export let call: RecursiveCall<IOValueObject<any>, IOValue | IOValueObject<any>>;
+    export let call: RecursiveCall<IOValueObject<unknown>, IOValue | IOValueObject<unknown>>;
     export let algorithmName: string;
 
     const dispatch = createEventDispatcher();
     let container: HTMLDivElement;
     let pz: PanZoom;
-    let highlightedCall: RecursiveCall<IOValueObject<any>, IOValue | IOValueObject<any>> | null = null
-    let callComponent: RecursiveCallComponent<IOValueObject<any>, IOValue | IOValueObject<any>>;
+    let highlightedCall: RecursiveCall<IOValueObject<unknown>, IOValue | IOValueObject<unknown>> | null = null
+    let callComponent: RecursiveCallComponent<IOValueObject<unknown>, IOValue | IOValueObject<unknown>>;
+    let callIsBeingConquered = false
     let detailsStepIndex = 0
     let detailsKeyframeIndex = 0
     let detailsPlaying = false
     let keyframesPlaying = false
     let playing = false
     let showDetails = false
+    let wasCameraLocked = true
     let lockCamera = true
     let playbackSpeed = 2
 
@@ -46,6 +48,16 @@
     $: if (highlightedCall !== null) {
         detailsStepIndex = 0
         detailsKeyframeIndex = 0
+    }
+
+    $: if (callIsBeingConquered) {
+        wasCameraLocked = lockCamera
+        lockCamera = false
+    }
+
+    $: if (!callIsBeingConquered) {
+        lockCamera = wasCameraLocked
+        highlightedCall = highlightedCall
     }
 
     // Set the value keyframes as the value keyframes of the current details step
@@ -126,14 +138,12 @@
     }
 
     async function step() {
-        if (highlightedCall === null && !call.isDivided()) {
-            highlightedCall = call
+        if (highlightedCall !== call.next()) {
+            highlightedCall = call.next()
             return
         }
-        if (
-            highlightedCall === null 
-            || detailsEnded 
-            || highlightedCall !== call.lastActedUpon()
+        else if (
+            detailsEnded 
             || !showDetails
         ) {
             callComponent.step()
@@ -145,14 +155,16 @@
     }
 
     function stepBack() {
-        if (
-            highlightedCall === null
+        if (highlightedCall !== call.previous()) {
+            highlightedCall = call.previous()
+            return
+        }
+        else if (
+            !showDetails
             || (
                 detailsStepIndex === 0
                 && detailsKeyframeIndex === 0
             )
-            || highlightedCall !== call.lastActedUpon()
-            || !showDetails
         ) {
             callComponent.back()
             call = call
@@ -163,6 +175,8 @@
     }
 
     async function play() {
+        detailsPlaying = false
+        keyframesPlaying = false
         if (playing) {
             return
         }
@@ -204,8 +218,9 @@
         call = call
     }
 
-    function updateCall() {
+    function onUpdate() {
         call = call
+        highlightedCall = highlightedCall
     }
 
     onMount(() => {
@@ -237,7 +252,7 @@
                     <button 
                         on:click={resetCall}
                         disabled={!call.isDivided() || playing}
-                        class="rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:outline hover:outline-blue-400 hover:outline-2"
+                        class="rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:ring-blue-400 hover:ring-2"
                         class:bg-white={call.isDivided() && !playing}
                         class:bg-gray-400={!call.isDivided() || playing}
                     >
@@ -247,7 +262,7 @@
                     <!-- Lock camera -->
                     {#if lockCamera}
                         <button on:click={() => lockCamera = false}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:outline hover:outline-blue-400 hover:outline-2"
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:ring-blue-400 hover:ring-2"
                         >
                             <div class="brightness-0">
                                 <Icon src={HiSolidVideoCamera} size="16" color="black"/>
@@ -267,10 +282,10 @@
                     {#if call.isMemoisable()}
                         <button 
                             on:click={toggleMemoise}
-                            disabled={playing}
-                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:outline hover:outline-blue-400 hover:outline-2"
-                            class:bg-white={!playing}
-                            class:bg-gray-400={playing}
+                            disabled={playing || callIsBeingConquered}
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:ring-blue-400 hover:ring-2"
+                            class:bg-white={!playing && !callIsBeingConquered}
+                            class:bg-gray-400={playing || callIsBeingConquered}
                         >
                             {#if call.memoise}
                                 <Icon src={FaSolidSave} size="16"/>
@@ -284,7 +299,7 @@
 
             <div class="flex w-full md:w-fit justify-between md:justify-start md:space-x-8 items-center">
                 <!-- Playback -->
-                <div class="flex rounded-full hover:outline hover:outline-blue-400 hover:outline-2">
+                <div class="flex rounded-full hover:ring-blue-400 hover:ring-2">
                     
                     <!-- Step back -->
                     <button 
@@ -377,21 +392,29 @@
         </div>
 
         <!-- Header -->
-        <div class="flex p-3 md:p-4 z-50">
-            <h1 class="text-3xl font-bold cursor-pointer" on:click={() => dispatch("reset")}>Divisualise!</h1>
+        <div 
+            class="flex p-3 md:p-4 z-50"
+            on:click={() => dispatch("reset")}
+            on:keypress={(e) => e.key === "Enter" && dispatch("reset")}
+            tabindex="0"
+            role="button"
+            aria-label="Menu"
+        >
+            <h1 class="text-3xl font-bold cursor-pointer">Divisualise!</h1>
         </div>
 
         <!-- Main -->
         <div class="flex grow w-full h-full justify-center">
-            <div class="flex flex-col w-full h-full items-center pt-[20%] touch-none outline-none" bind:this={container}>
+            <div class="flex flex-col w-full h-full items-center pt-[20%] touch-none ring-none" bind:this={container}>
                 <!-- Show the call -->
                 <RecursiveCallComponent
                     bind:this={callComponent} 
                     call={call} 
+                    bind:callIsBeingConquered
                     title={algorithmName}
-                    on:update={updateCall}
+                    on:update={onUpdate}
                     on:highlightedPosition={onHighlightedPosition}
-                    on:callReset={updateCall}
+                    on:callReset={onUpdate}
                     bind:highlightedCall
                     bind:detailsStepIndex
                     bind:detailsKeyframeIndex
@@ -429,7 +452,7 @@
 
 
                                 <!-- Playback -->
-                                <div class="flex rounded-full w-full justify-center mb-2 md:mb-4 hover:outline hover:outline-blue-400 hover:outline-2">
+                                <div class="flex rounded-full w-full justify-center mb-2 md:mb-4 hover:ring-blue-400 hover:ring-2">
 
                                     <!-- Step back details -->
                                     <button 
@@ -701,7 +724,6 @@
         width: 100%;
         height: 4px;
         cursor: pointer;
-        animate: 0.2s;
         box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
         background: black;
         border-radius: 1.3px;
@@ -711,7 +733,6 @@
         width: 100%;
         height: 4px;
         cursor: pointer;
-        animate: 0.2s;
         box-shadow: 0 0 2px 0 rgba(0,0,0,0.2);
         background: black;
         border-radius: 1.3px;

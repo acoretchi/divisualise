@@ -6,6 +6,7 @@
     import type { IOValueObject, IOValue } from "$lib/core/recursive_call";
     import Value from "$lib/components/values/Value.svelte";
 
+    // @ts-ignore
     import Icon from "svelte-icons-pack/Icon.svelte";
     import ImCross from "svelte-icons-pack/im/ImCross";
     import FiDivide from "svelte-icons-pack/fi/FiDivide";
@@ -15,13 +16,14 @@
 
     export let call: RecursiveCall<In, Out>;
     export let highlightedCall: RecursiveCall<In, Out> | null = null;
-
+    export let callIsBeingConquered: boolean = false;
     export let detailsHighlight: boolean = false;
     export let detailsStepIndex: number
     export let detailsKeyframeIndex: number
     export let title: string | null = null;
     const dispatch = createEventDispatcher();
     let card: HTMLDivElement;
+
 
     $: if (highlightedCall === call) {
         let rect = card.getBoundingClientRect()
@@ -31,12 +33,12 @@
         })
     }
 
-    function preserveHighlight(fn: () => void) {
+    async function preserveHighlight(fn: () => Promise<void>) {
         let highlighted = false
         if (highlightedCall === call) {
             highlighted = true
         }
-        fn()
+        await fn()
         if (highlighted) {
             highlightedCall = call
         }
@@ -58,21 +60,21 @@
         call = call
     }
 
-    export function conquer() {
-        preserveHighlight(() => {
-            step(false)
-            if (!call.isSolved()) {
-                setTimeout(() => {
-                    conquer()
-                }, 40);
+    export async function conquer() {
+        callIsBeingConquered = true
+        await preserveHighlight(async () => {
+            while (!call.isSolved()) {
+                step(false)
+                await new Promise(resolve => setTimeout(resolve, 40))
             }
         })
+        callIsBeingConquered = false
         call = call
         dispatch("update");
     }
 
     function divide() {
-        preserveHighlight(() => {
+        preserveHighlight(async () => {
             call.divide();
         })
         call = call
@@ -80,7 +82,7 @@
     }
 
     export function reset() {
-        preserveHighlight(() => {
+        preserveHighlight(async () => {
             call.reset()
         })
         call = call
@@ -127,9 +129,8 @@
             role="button"
             tabindex="0"
             class="flex bg-white flex-col justify-center w-fit h-fit rounded-lg mx-8 shadow-2xl"
-            class:outline={highlightedCall == call || highlightedCall?.memoisedCall() == call || detailsHighlight}
-            class:outline-[16px]={highlightedCall == call || highlightedCall?.memoisedCall() == call || detailsHighlight}
-            class:outline-blue-400={highlightedCall == call || highlightedCall?.memoisedCall() == call || detailsHighlight}
+            class:ring-[16px]={highlightedCall == call || highlightedCall?.memoisedCall() == call || detailsHighlight}
+            class:ring-blue-400={highlightedCall == call || highlightedCall?.memoisedCall() == call || detailsHighlight}
             bind:this={card}
         >
             <!-- Colour Header -->
@@ -219,6 +220,7 @@
             {#if Object.keys(call._state.case.calls_and_positions()).length === 1}
                 <svelte:self 
                     call={Object.values(call._state.case.calls_and_positions())[0].call} 
+                    bind:callIsBeingConquered
                     bind:detailsStepIndex
                     bind:detailsKeyframeIndex
                     detailsHighlight={
@@ -249,6 +251,7 @@
                         {/if}
                         <svelte:self 
                             call={next.call} 
+                            bind:callIsBeingConquered
                             bind:detailsStepIndex
                             bind:detailsKeyframeIndex
                             detailsHighlight={

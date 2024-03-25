@@ -11,6 +11,7 @@
     import type { RecursiveCall, IOValue, IOValueObject } from "$lib/core/recursive_call";
     import type { AlgorithmConfig } from "$lib/algorithms";
 
+    // @ts-ignore
     import Icon from "svelte-icons-pack/Icon.svelte";
     import FaSolidSortAmountDown from "svelte-icons-pack/fa/FaSolidSortAmountDown";
     import FaSolidSearch from "svelte-icons-pack/fa/FaSolidSearch";
@@ -20,7 +21,10 @@
     import CgToggleSquare from "svelte-icons-pack/cg/CgToggleSquare";
     import BiScatterChart from "svelte-icons-pack/bi/BiScatterChart";
 
-    let selectedAlgorithm: AlgorithmConfig<IOValueObject<unknown>, IOValue> | null = null
+    let selectedAlgorithm: AlgorithmConfig<
+        IOValueObject<unknown>,
+        IOValue | IOValueObject<unknown>
+    > | null = null
     let input: unknown = null
     let inputError: string | null = null
     let call: RecursiveCall<IOValueObject<unknown>, IOValue> | null = null
@@ -54,11 +58,20 @@
 </script>
 
 
-{#if call === null}
+{#if call === null || selectedAlgorithm === null}
     <div class="flex w-screen h-screen bg-gray-50 justify-center overflow-y-scroll">
         <div class="flex flex-col w-5/6 md:w-2/3 max-w-xl my-12 md:my-24 h-fit">
-            <div class="relative flex mx-auto">
-                <h1 class="text-5xl md:text-6xl font-bold mx-auto cursor-pointer" on:click={reset}>
+            <div 
+                class="relative flex mx-auto"
+                on:click={reset}
+                on:keypress={reset}
+                aria-label="Reset"
+                role="button"
+                tabindex="0"
+            >
+                <h1 
+                    class="text-5xl md:text-6xl font-bold mx-auto cursor-pointer" 
+                >
                     Divisualise!
                 </h1>
                 <div class="text-xs md:text-md bg-blue-400 rounded-full absolute left-[98%] bottom-[60%] py-1 px-2 text-white font-bold">
@@ -80,35 +93,35 @@
                 {#each ALGORITHMS as algorithm, i}
                     <button
                         on:click={() => selectedAlgorithm = algorithm}
-                        class="text-lg md:text-2xl font-bold bg-white p-2 md:p-4 my-1 md:my-2 cursor-pointer transition duration-200 ease-out flex items-center drop-shadow-md hover:drop-shadow-2xl border-4 border-black hover:outline hover:outline-4 hover:outline-blue-400 rounded-xl hover:scale-105 active:scale-95"
+                        class="text-lg md:text-2xl font-bold bg-white p-2 md:p-4 my-1 md:my-2 cursor-pointer transition duration-200 ease-out flex items-center drop-shadow-md hover:drop-shadow-2xl border-4 border-black hover:ring-4 hover:ring-blue-400 rounded-xl hover:scale-105 active:scale-95"
                         in:fly|local={{ y: 20, delay: i * 100, easing: quintOut }}
                     >
                         {#if algorithm.icon === "Sort"}
-                            <div class="scale-90 md:scale-100 p-2 bg-red-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                            <div class="scale-90 md:scale-100 p-2 bg-red-400 rounded-full mr-2 md:mr-4 ring-4 ring-black">
                                 <Icon src={FaSolidSortAmountDown} size={iconWidth} color="black" />
                             </div>
                         {:else if algorithm.icon === "Search"}
-                            <div class="scale-90 md:scale-100 p-2 bg-blue-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                            <div class="scale-90 md:scale-100 p-2 bg-blue-400 rounded-full mr-2 md:mr-4 ring-4 ring-black">
                                 <Icon src={FaSolidSearch} size={iconWidth} color="black" />
                             </div>
                         {:else if algorithm.icon === "Matrix"}
-                            <div class="scale-90 md:scale-100 p-2 bg-purple-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                            <div class="scale-90 md:scale-100 p-2 bg-purple-400 rounded-full mr-2 md:mr-4 ring-4 ring-black">
                                 <Icon src={BiSolidChess} size={iconWidth} color="black" />
                             </div>
                         {:else if algorithm.icon === "Maths"}
-                            <div class="scale-90 md:scale-100 p-2 bg-green-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                            <div class="scale-90 md:scale-100 p-2 bg-green-400 rounded-full mr-2 md:mr-4 ring-4 ring-black">
                                 <Icon src={BiMath} size={iconWidth} color="black" />
                             </div>
                         {:else if algorithm.icon === "Array"}
-                            <div class="scale-90 md:scale-100 p-2 bg-yellow-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                            <div class="scale-90 md:scale-100 p-2 bg-yellow-400 rounded-full mr-2 md:mr-4 ring-4 ring-black">
                                 <Icon src={CgToggleSquare} size={iconWidth} />
                             </div>
                         {:else if algorithm.icon === "Points"}
-                            <div class="scale-90 md:scale-100 p-2 bg-orange-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                            <div class="scale-90 md:scale-100 p-2 bg-orange-400 rounded-full mr-2 md:mr-4 ring-4 ring-black">
                                 <Icon src={BiScatterChart} size={iconWidth} color="black" />
                             </div>
                         {:else}
-                            <div class="scale-90 md:scale-100 p-2 bg-gray-200 rounded-full mr-2 md:mr-4 outline outline-4">
+                            <div class="scale-90 md:scale-100 p-2 bg-gray-200 rounded-full mr-2 md:mr-4 ring-4 ring-black">
                                 <Icon src={FaSolidDivide} size={iconWidth} />
                             </div>
                         {/if}

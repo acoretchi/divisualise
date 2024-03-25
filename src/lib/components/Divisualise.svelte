@@ -145,7 +145,6 @@
                 && !highlightedCall.isCombinable()
                 && detailsEnded
             )
-            || highlightedCall.isMemoised()
         ) {
 
             highlightedCall = call.next()

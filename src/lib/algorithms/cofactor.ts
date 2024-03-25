@@ -1,5 +1,5 @@
-import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
-import type { CallDetails } from "$lib/core/recursive_call"
+import { RecursiveCall, RecursiveCase, DivideCase, BaseCase } from "$lib/core/recursive_call"
+import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { Matrix, NumberValue } from "$lib/core/values"
 
 
@@ -10,22 +10,22 @@ export interface CofactorExpansionInput {
 
 export class CofactorExpansionCall extends RecursiveCall<CofactorExpansionInput, NumberValue> {
 
-    constructor(input: CofactorExpansionInput) {
-        super(input)
+    constructor(input: CofactorExpansionInput, root: CofactorExpansionCall | null = null) {
         if (input.matrix.matrix.length !== input.matrix.matrix[0].length) {
             throw new Error("The matrix must be square.")
         }
         if (input.matrix.matrix.length < 2) {
             throw new Error("The matrix must be at least 2x2.")
         }
+        super(input, root)
     }
 
-    case(): DivideCase<CofactorExpansionInput, NumberValue> | BaseCase<CofactorExpansionInput, NumberValue> {
+    case(root: CofactorExpansionCall): RecursiveCase<CofactorExpansionInput, NumberValue> {
         const matrix = this.input().matrix.copy()
         if (matrix.matrix.length === 2) {
             return new CofactorExpansionBaseCase(this.input())
         } else {
-            return new CofactorExpansionDivideCase(this.input(), generateCofactorCalls(matrix))
+            return new CofactorExpansionDivideCase(this.input(), root)
         }
     }
 
@@ -41,6 +41,10 @@ export class CofactorExpansionCall extends RecursiveCall<CofactorExpansionInput,
 }
 
 export class CofactorExpansionDivideCase extends DivideCase<CofactorExpansionInput, NumberValue> {
+
+    divide(input: CofactorExpansionInput, root: CofactorExpansionCall): RecursiveCalls<CofactorExpansionInput, NumberValue> {
+        return generateCofactorCalls(input.matrix, root)
+    }
 
     combine(): NumberValue {
         let determinant = new NumberValue(0)
@@ -185,12 +189,12 @@ export class CofactorExpansionBaseCase extends BaseCase<CofactorExpansionInput, 
 }
 
 
-function generateCofactorCalls(matrix: Matrix): { [key: string]: CofactorExpansionCall } {
+function generateCofactorCalls(matrix: Matrix, root: CofactorExpansionCall): { [key: string]: CofactorExpansionCall } {
     const cofactorCalls: { [key: string]: CofactorExpansionCall } = {}
     for (let i = 0; i < matrix.matrix.length; i++) {
         cofactorCalls[`Cofactor ${i+1}`] = new CofactorExpansionCall({
             matrix: getCofactor(matrix, 0, i)
-        })
+        }, root)
     }
     return cofactorCalls
 }

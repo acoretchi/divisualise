@@ -1,3 +1,5 @@
+import type { IOValue, IOValueObject } from "$lib/core/recursive_call"
+
 import { FibonacciCall } from "$lib/algorithms/fibonacci"
 import { MergeSortCall } from "$lib/algorithms/merge_sort"
 import { BinarySearchCall } from "$lib/algorithms/binary_search"
@@ -11,7 +13,11 @@ import type { AlgorithmConfig } from "$lib/core/recursive_call"
 
 export type { InputType,  AlgorithmConfig } from "$lib/core/recursive_call"
 
-export const ALGORITHMS: AlgorithmConfig[] = [
+
+export const ALGORITHMS: AlgorithmConfig<
+    IOValueObject<unknown>,
+    IOValue | IOValueObject<unknown>
+>[] = [
     { 
         name: "Merge Sort",
         icon: "Sort",

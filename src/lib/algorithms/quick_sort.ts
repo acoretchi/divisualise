@@ -1,5 +1,5 @@
-import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call";
-import type { CallDetails } from "$lib/core/recursive_call";
+import { RecursiveCall, RecursiveCase, DivideCase, BaseCase } from "$lib/core/recursive_call";
+import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call";
 import { NumberList, NumberValue } from "$lib/core/values";
 
 export interface QuickSortInput {
@@ -11,19 +11,12 @@ export class QuickSortCall extends RecursiveCall<QuickSortInput, NumberList> {
         return "Quick Sort";
     }
 
-    case(): DivideCase<QuickSortInput, NumberList> | BaseCase<QuickSortInput, NumberList> {
+    case(root: QuickSortCall): RecursiveCase<QuickSortInput, NumberList> {
         const array = this.input().array.values;
         if (array.length <= 1) {
-            return new QuickSortBaseCase({ array: this.input().array });
+            return new QuickSortBaseCase({ array: this.input().array })
         } else {
-            const pivotIndex = Math.floor(array.length / 2);
-            const pivot = array[pivotIndex].value;
-            const left = new NumberList(array.filter((_, i) => i !== pivotIndex && _.value <= pivot));
-            const right = new NumberList(array.filter((_, i) => i !== pivotIndex && _.value > pivot));
-            return new QuickSortDivideCase(this.input(), {
-                "Left": new QuickSortCall({ array: left }),
-                "Right": new QuickSortCall({ array: right }),
-            });
+            return new QuickSortDivideCase(this.input(), root);
         }
     }
 
@@ -38,6 +31,18 @@ export class QuickSortCall extends RecursiveCall<QuickSortInput, NumberList> {
 }
 
 export class QuickSortDivideCase extends DivideCase<QuickSortInput, NumberList> {
+
+    divide(input: QuickSortInput, root: QuickSortCall): RecursiveCalls<QuickSortInput, NumberList> {
+        const array = input.array.values;
+        const pivotIndex = Math.floor(array.length / 2);
+        const pivot = array[pivotIndex].value;
+        const left = new NumberList(array.filter((_, i) => i !== pivotIndex && _.value <= pivot));
+        const right = new NumberList(array.filter((_, i) => i !== pivotIndex && _.value > pivot));
+        return {
+            "Left": new QuickSortCall({ array: left }, root),
+            "Right": new QuickSortCall({ array: right }, root),
+        };
+    }
 
     combine(): NumberList {
         const pivotIndex = Math.floor(this.input().array.values.length / 2);

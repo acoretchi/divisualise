@@ -1,12 +1,26 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // We define wrappers for our input and output types to augment them with
 // styling information for display in the visualisation.
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export class NumberValue {
+export abstract class Value {
+    abstract copy(): ThisType<this>;
+    abstract copyDefault(): ThisType<this>;
+    abstract equals(other: ThisType<this>): boolean;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Concrete
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export class NumberValue extends Value {
     value: number;
     colour: string = "black";
     struck: boolean = false;
 
     constructor(value: number) {
+        super();
         this.value = value;
     }
 
@@ -19,6 +33,10 @@ export class NumberValue {
 
     copyDefault(): NumberValue {
         return new NumberValue(this.value);
+    }
+
+    equals(other: NumberValue): boolean {
+        return this.value === other.value;
     }
 
     coloured(colour: string): NumberValue {
@@ -35,11 +53,16 @@ export class NumberValue {
 }
 
 
-export class NumberList {
+export class NumberList extends Value {
     values: NumberValue[];
 
     constructor(values: NumberValue[]) {
+        super();
         this.values = values;
+    }
+
+    static fromArray(values: number[]): NumberList {
+        return new NumberList(values.map(v => new NumberValue(v)));
     }
 
     copy(): NumberList {
@@ -50,6 +73,13 @@ export class NumberList {
         return new NumberList(this.values.map(v => v.copyDefault()));
     }
 
+    equals(other: NumberList): boolean {
+        if (this.values.length !== other.values.length) {
+            return false;
+        }
+        return this.values.every((v, i) => v.equals(other.values[i]));
+    }
+
     coloured(colour: string): NumberList {
         return new NumberList(this.values.map(v => v.coloured(colour)));
     }
@@ -57,11 +87,16 @@ export class NumberList {
 }
 
 
-export class Matrix {
+export class Matrix extends Value {
     matrix: NumberValue[][];
 
     constructor(matrix: NumberValue[][]) {
+        super();
         this.matrix = matrix;
+    }
+
+    static fromArray(values: number[][]): Matrix {
+        return new Matrix(values.map(row => row.map(v => new NumberValue(v))))
     }
 
     static zeroes(rows: number, cols: number): Matrix {
@@ -78,6 +113,18 @@ export class Matrix {
 
     copyDefault(): Matrix {
         return new Matrix(this.matrix.map(row => row.map(v => v.copyDefault())));
+    }
+
+    equals(other: Matrix): boolean {
+        if (this.matrix.length !== other.matrix.length) {
+            return false;
+        }
+        return this.matrix.every((row, i) => {
+            if (row.length !== other.matrix[i].length) {
+                return false;
+            }
+            return row.every((v, j) => v.equals(other.matrix[i][j]));
+        });
     }
 
     addEmptyRow(cols: number): void {
@@ -102,19 +149,21 @@ export class Matrix {
 // Geometric
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export class Point {
+export class Point extends Value {
     x: number;
     y: number;
     colour: string = "black";
 
     constructor(x: number, y: number) {
+        super();
         this.x = x;
         this.y = y;
     }
 
     copy(): Point {
-        return new Point(this.x, this.y)
-            .coloured(this.colour);
+        const copy = new Point(this.x, this.y);
+        copy.colour = this.colour;
+        return copy;
     }
 
     copyDefault(): Point {
@@ -126,49 +175,59 @@ export class Point {
     }
 
     coloured(colour: string): Point {
-        this.colour = colour;
-        return this;
+        const copy = this.copy();
+        copy.colour = colour;
+        return copy;
     }
 }
 
 
-export class Line {
+export class Line extends Value {
     start: Point;
     end: Point;
     colour: string = "black";
 
     constructor(start: Point, end: Point) {
+        super();
         this.start = start;
         this.end = end;
     }
 
     copy(): Line {
-        return new Line(this.start.copy(), this.end.copy())
-            .coloured(this.colour);
+        const copy = new Line(this.start.copy(), this.end.copy());
+        copy.colour = this.colour;
+        return copy;
     }
 
     copyDefault(): Line {
         return new Line(this.start.copyDefault(), this.end.copyDefault());
     }
 
+    equals(other: Line): boolean {
+        return this.start.equals(other.start) && this.end.equals(other.end);
+    }
+
     coloured(colour: string): Line {
-        this.colour = colour;
-        return this;
+        const copy = this.copy();
+        copy.colour = colour;
+        return copy;
     }
 }
 
 
-export class Points {
+export class Points extends Value {
     points: Point[];
     lines: Line[] = []
 
     constructor(points: Point[]) {
+        super();
         this.points = points;
     }
 
     copy(): Points {
-        return new Points(this.points.map(p => p.copy()))
-            .withLines(this.lines.map(l => l.copy()));
+        const copy = new Points(this.points.map(p => p.copy()))
+        copy.lines = this.lines.map(l => l.copy())
+        return copy;
     }
 
     copyDefault(): Points {
@@ -176,19 +235,30 @@ export class Points {
             .withLines(this.lines.map(l => l.copyDefault()));
     }
 
+    equals(other: Points): boolean {
+        // Equality is order-dependent
+        if (this.points.length !== other.points.length) {
+            return false;
+        }
+        return this.points.every((p, i) => p.equals(other.points[i]));
+    }
+
     withLines(lines: Line[]): Points {
-        this.lines = lines;
-        return this;
+        const copy = this.copy();
+        copy.lines = lines;
+        return copy;
     }
 
     addLine(line: Line): Points {
-        this.lines.push(line);
-        return this;
+        const copy = this.copy();
+        copy.lines.push(line);
+        return copy;
     }
 
     addLines(lines: Line[]): Points {
-        this.lines = this.lines.concat(lines);
-        return this;
+        const copy = this.copy();
+        copy.lines.push(...lines);
+        return copy;
     }
 
     addPoint(point: Point): void {

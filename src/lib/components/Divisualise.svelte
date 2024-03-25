@@ -138,31 +138,29 @@
     }
 
     async function step() {
+        const next = call.next()
         if (
-            highlightedCall === null
-            || (
-                highlightedCall === call.lastActedOn() 
-                && !highlightedCall.isCombinable()
-                && detailsEnded
-            )
+            highlightedCall === call.lastActedOn() 
         ) {
-
-            highlightedCall = call.next()
-            return
+            if (
+                highlightedCall?.isDivided() && !detailsEnded && showDetails
+            ) {
+                await stepDetails()
+            }
+            else if (!highlightedCall?.isCombinable()) {
+                highlightedCall = next
+                return
+            }
+            else {
+                callComponent.step()
+                call = call
+            }
         }
-        else if (
-            detailsEnded 
-            || !showDetails
-            || (
-                highlightedCall === call.next()
-                && highlightedCall.isCombinable()
-            )
-        ) {
+        else if (highlightedCall !== next) {
+            highlightedCall = next
+        } else {
             callComponent.step()
             call = call
-        }
-        else {
-            await stepDetails()
         }
     }
 

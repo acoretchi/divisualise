@@ -265,7 +265,12 @@ export abstract class RecursiveCall<
     // Return the details for the call.
     details(): CallDetails {
         if (this._state.type === "undivided") {
-            if (this._state.memoisedPath !== null && this.isRootMemoised()) {
+            // If we're in a memoised tree and this isn't the first occurence of a subproblem.
+            if (
+                this._state.memoisedPath !== null 
+                && this.isRootMemoised() 
+                && !(this._state.memoisedPath.join(",") === this.pathFromRoot()?.join(","))
+            ) {
                 if (this.isDivisible()) {
                     return [{
                         text: "This call depends on a subproblem that we solved earlier in the tree.",

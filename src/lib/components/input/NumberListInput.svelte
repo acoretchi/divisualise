@@ -82,7 +82,7 @@
                 </div>
             {/each}
             <div class="flex h-16 md:h-20 aspect-square items-center justify-center border-2 border-r-2 border-black">
-                <input type="text" class="text-gray-800 bg-gray-400 text-2xl md:text-4xl w-full h-full text-center border-none ring-0 outline-none" bind:value={inputBuffers[inputBuffers.length - 1]} on:input={(event) => onInput(event, inputBuffers.length - 1)} on:keydown={(event) => deleteOnBackspace(event, inputBuffers.length - 1)} on:click={() => {focusedIndex = inputBuffers.length - 1}} />
+                <input type="text" class="text-gray-800 bg-gray-400 text-2xl md:text-4xl w-full h-full text-center border-none ring-0 outline-none" bind:value={inputBuffers[inputBuffers.length - 1]} on:input={(event) => onInput(event, inputBuffers.length - 1)} on:keydown={(event) => deleteOnBackspace(event, inputBuffers.length - 1)} on:focus={() => {focusedIndex = inputBuffers.length - 1}} />
             </div>
         </div>
     </div>

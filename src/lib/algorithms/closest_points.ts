@@ -1,4 +1,4 @@
-import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
+import { RecursiveCall, DivideCase, BaseCase, RecursiveCase } from "$lib/core/recursive_call"
 import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { Points, Point, Line } from "$lib/core/values"
 
@@ -10,12 +10,12 @@ export interface ClosestPointsInput {
 
 export class ClosestPointsCall extends RecursiveCall<ClosestPointsInput, Points> {
     
-    case(): DivideCase<ClosestPointsInput, Points> | BaseCase<ClosestPointsInput, Points> {
+    case(root: ClosestPointsCall): RecursiveCase<ClosestPointsInput, Points> {
         const points = this.input().points.copy().points.sort((a, b) => a.x - b.x)
         if (points.length <= 3) {
             return new ClosestPointsBaseCase({ points: new Points(points) })
         } else {
-            return new ClosestPointsDivideCase(this.input())
+            return new ClosestPointsDivideCase(this.input(), root)
         }
     }
 
@@ -32,16 +32,16 @@ export class ClosestPointsCall extends RecursiveCall<ClosestPointsInput, Points>
 
 export class ClosestPointsDivideCase extends DivideCase<ClosestPointsInput, Points> {
 
-    divide(input: ClosestPointsInput): RecursiveCalls<ClosestPointsInput, Points> {
+    divide(input: ClosestPointsInput, root: ClosestPointsCall): RecursiveCalls<ClosestPointsInput, Points> {
         const points = input.points.copy().points.sort((a, b) => a.x - b.x)
         const midX = points[Math.floor(points.length / 2)].x
         return {
             "Left": new ClosestPointsCall({
                 points: new Points(points.slice().filter(p => p.x <= midX))
-            }),
+            }, root),
             "Right": new ClosestPointsCall({
                 points: new Points(points.slice().filter(p => p.x > midX))
-            })
+            }, root)
         }
     }
 

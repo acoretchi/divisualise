@@ -1,13 +1,16 @@
 <script lang="ts">
     import "../app.css";
     import "@fontsource-variable/nunito"
-    import { ALGORITHMS } from "$lib/algorithms";
-    import Inputs from "$lib/components/input/Inputs.svelte";
-    import type { RecursiveCall } from "$lib/core/recursive_call"
-    import type { AlgorithmConfig } from "$lib/algorithms";
-    import Divisualise from "$lib/components/Divisualise.svelte";
+
     import { fly } from 'svelte/transition';
     import { quintOut } from 'svelte/easing';
+
+    import { ALGORITHMS } from "$lib/algorithms";
+    import Inputs from "$lib/components/input/Inputs.svelte";
+    import Divisualise from "$lib/components/Divisualise.svelte";
+    import type { RecursiveCall, IOValue, IOValueObject } from "$lib/core/recursive_call";
+    import type { AlgorithmConfig } from "$lib/algorithms";
+
     import Icon from "svelte-icons-pack/Icon.svelte";
     import FaSolidSortAmountDown from "svelte-icons-pack/fa/FaSolidSortAmountDown";
     import FaSolidSearch from "svelte-icons-pack/fa/FaSolidSearch";
@@ -17,10 +20,10 @@
     import CgToggleSquare from "svelte-icons-pack/cg/CgToggleSquare";
     import BiScatterChart from "svelte-icons-pack/bi/BiScatterChart";
 
-    let selectedAlgorithm: AlgorithmConfig | null = null
+    let selectedAlgorithm: AlgorithmConfig<IOValueObject<unknown>, IOValue> | null = null
     let input: unknown = null
     let inputError: string | null = null
-    let call: RecursiveCall<unknown, unknown> | null = null
+    let call: RecursiveCall<IOValueObject<unknown>, IOValue> | null = null
     let iconWidth = 24
 
 
@@ -66,7 +69,7 @@
                 By <a href="https://armandcoretchi.com" target="_blank" class="text-blue-400 underline">Armand Coretchi</a>.
             </div>
             <span class="text-md md:text-xl font-bold mx-auto mb-2 md:mb-6">
-                Please complete the <a href="https://forms.gle/bthpuGJ6CdeES7q9A" target="_blank" class="text-blue-400 underline">user survey</a> after using the tool!
+                Please complete the <a href="https://forms.gle/bthpuGJ6CdeES7q9A" target="_blank" class="text-blue-400 underline">user survey</a> after using Divisualise!
             </span>
 
             {#if selectedAlgorithm === null}
@@ -81,30 +84,28 @@
                         in:fly|local={{ y: 20, delay: i * 100, easing: quintOut }}
                     >
                         {#if algorithm.icon === "Sort"}
-                            <div class="scale-90 md:scale-100 p-2 bg-red-500 rounded-full mr-2 md:mr-4 outline outline-4">
-                                <Icon src={FaSolidSortAmountDown} size={iconWidth} color="white" />
+                            <div class="scale-90 md:scale-100 p-2 bg-red-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                                <Icon src={FaSolidSortAmountDown} size={iconWidth} color="black" />
                             </div>
                         {:else if algorithm.icon === "Search"}
-                            <div class="scale-90 md:scale-100 p-2 bg-blue-500 rounded-full mr-2 md:mr-4 outline outline-4">
-                                <Icon src={FaSolidSearch} size={iconWidth} color="white" />
+                            <div class="scale-90 md:scale-100 p-2 bg-blue-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                                <Icon src={FaSolidSearch} size={iconWidth} color="black" />
                             </div>
                         {:else if algorithm.icon === "Matrix"}
-                            <div class="scale-90 md:scale-100 p-2 bg-purple-500 rounded-full mr-2 md:mr-4 outline outline-4">
-                                <Icon src={BiSolidChess} size={iconWidth} color="white" />
+                            <div class="scale-90 md:scale-100 p-2 bg-purple-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                                <Icon src={BiSolidChess} size={iconWidth} color="black" />
                             </div>
                         {:else if algorithm.icon === "Maths"}
                             <div class="scale-90 md:scale-100 p-2 bg-green-400 rounded-full mr-2 md:mr-4 outline outline-4">
-                                <Icon src={BiMath} size={iconWidth} color="white" />
+                                <Icon src={BiMath} size={iconWidth} color="black" />
                             </div>
                         {:else if algorithm.icon === "Array"}
-                            <div class="scale-90 md:scale-100 p-2 bg-yellow-500 rounded-full mr-2 md:mr-4 outline outline-4">
-                                <div class="invert">
-                                    <Icon src={CgToggleSquare} size={iconWidth} />
-                                </div>
+                            <div class="scale-90 md:scale-100 p-2 bg-yellow-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                                <Icon src={CgToggleSquare} size={iconWidth} />
                             </div>
                         {:else if algorithm.icon === "Points"}
-                            <div class="scale-90 md:scale-100 p-2 bg-orange-500 rounded-full mr-2 md:mr-4 outline outline-4">
-                                <Icon src={BiScatterChart} size={iconWidth} color="white" />
+                            <div class="scale-90 md:scale-100 p-2 bg-orange-400 rounded-full mr-2 md:mr-4 outline outline-4">
+                                <Icon src={BiScatterChart} size={iconWidth} color="black" />
                             </div>
                         {:else}
                             <div class="scale-90 md:scale-100 p-2 bg-gray-200 rounded-full mr-2 md:mr-4 outline outline-4">

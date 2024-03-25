@@ -1,4 +1,4 @@
-import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
+import { RecursiveCall, DivideCase, BaseCase, RecursiveCase } from "$lib/core/recursive_call"
 import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { NumberList, NumberValue } from "$lib/core/values"
 
@@ -12,7 +12,10 @@ interface BinarySearchInput {
 
 export class BinarySearchCall extends RecursiveCall<BinarySearchInput, NumberValue> {
 
-    constructor (input: BinarySearchInput) {
+    constructor (
+        input: BinarySearchInput,
+        root: BinarySearchCall | null = null
+    ) {
         if (input.array.values.length === 0) {
             throw new Error("Please enter a non-empty array.")
         }
@@ -22,10 +25,10 @@ export class BinarySearchCall extends RecursiveCall<BinarySearchInput, NumberVal
         else if (!input.index) {
             input.index = new NumberValue(0)
         }
-        super(input)
+        super(input, root)
     }
 
-    case(): DivideCase<BinarySearchInput, NumberValue> | BaseCase<BinarySearchInput, NumberValue> {
+    case(root: BinarySearchCall): RecursiveCase<BinarySearchInput, NumberValue> {
         const array = this.input().array.values
         const target = this.input().target
         if (array.length === 1) {
@@ -42,7 +45,7 @@ export class BinarySearchCall extends RecursiveCall<BinarySearchInput, NumberVal
                 return new BinarySearchFoundCase(this.input())
             } 
             else {
-                return new BinarySearchDivideCase(this.input())
+                return new BinarySearchDivideCase(this.input(), root)
             }
         }
     }
@@ -62,7 +65,7 @@ export class BinarySearchCall extends RecursiveCall<BinarySearchInput, NumberVal
 
 export class BinarySearchDivideCase extends DivideCase<BinarySearchInput, NumberValue> {
 
-    divide(input: BinarySearchInput): RecursiveCalls<BinarySearchInput, NumberValue> {
+    divide(input: BinarySearchInput, root: BinarySearchCall): RecursiveCalls<BinarySearchInput, NumberValue> {
         const array = input.array.values;
         const target = input.target.value;
         const middle = Math.floor(array.length / 2);
@@ -72,7 +75,7 @@ export class BinarySearchDivideCase extends DivideCase<BinarySearchInput, Number
                     array: new NumberList(array.slice(middle + 1)),
                     target: input.target,
                     index: new NumberValue(input.index.value + middle + 1)
-                }),
+                }, root),
             }
         }
         else {
@@ -81,7 +84,7 @@ export class BinarySearchDivideCase extends DivideCase<BinarySearchInput, Number
                     array: new NumberList(array.slice(0, middle)),
                     target: input.target,
                     index: input.index
-                }),
+                }, root),
             }
         }
     }

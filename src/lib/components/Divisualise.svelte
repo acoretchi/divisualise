@@ -1,5 +1,8 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
+    import { onMount } from 'svelte';
+
+    // @ts-ignore
     import Icon from "svelte-icons-pack/Icon.svelte";
     import FaSolidStepBackward from "svelte-icons-pack/fa/FaSolidStepBackward";
     import FaSolidStepForward from "svelte-icons-pack/fa/FaSolidStepForward";
@@ -7,26 +10,29 @@
     import FaSolidForward from "svelte-icons-pack/fa/FaSolidForward";
     import FaSolidPlay from "svelte-icons-pack/fa/FaSolidPlay";
     import FaSolidPause from "svelte-icons-pack/fa/FaSolidPause";
+    import FaSave from "svelte-icons-pack/fa/FaSave";
+    import FaSolidSave from "svelte-icons-pack/fa/FaSolidSave";
     import FaSolidChevronLeft from "svelte-icons-pack/fa/FaSolidChevronLeft";
     import HiOutlineVideoCamera from "svelte-icons-pack/hi/HiOutlineVideoCamera";
     import HiSolidVideoCamera from "svelte-icons-pack/hi/HiSolidVideoCamera";
     import ImCross from "svelte-icons-pack/im/ImCross";
-    import { onMount } from 'svelte';
-    import { fly, fade } from 'svelte/transition';
+
     import panzoom from "panzoom";
     import type { PanZoom } from "panzoom";
+
     import RecursiveCallComponent from "$lib/components/RecursiveCall.svelte";
-    import type { RecursiveCall } from "$lib/core/recursive_call"
     import Value from "$lib/components/values/Value.svelte"
+    import type { RecursiveCall, IOValue, IOValueObject } from "$lib/core/recursive_call"
 
 
-    export let call: RecursiveCall<unknown, unknown>;
+    export let call: RecursiveCall<IOValueObject<any>, IOValue | IOValueObject<any>>;
     export let algorithmName: string;
+
     const dispatch = createEventDispatcher();
     let container: HTMLDivElement;
     let pz: PanZoom;
-    let highlightedCall: RecursiveCall<unknown, unknown> | null = null
-    let callComponent: RecursiveCallComponent<unknown, unknown>
+    let highlightedCall: RecursiveCall<IOValueObject<any>, IOValue | IOValueObject<any>> | null = null
+    let callComponent: RecursiveCallComponent<IOValueObject<any>, IOValue | IOValueObject<any>>;
     let detailsStepIndex = 0
     let detailsKeyframeIndex = 0
     let detailsPlaying = false
@@ -193,6 +199,11 @@
         highlightedCall = call
     }
 
+    function toggleMemoise() {
+        call.toggleMemoise()
+        call = call
+    }
+
     function updateCall() {
         call = call
     }
@@ -210,6 +221,7 @@
     });
     
 </script>
+
 
 <div class="flex flex-col md:flex-row w-screen h-screen overflow-clip">
 
@@ -248,6 +260,23 @@
                             <div class="brightness-0">
                                 <Icon src={HiOutlineVideoCamera} size="16" color="black"/>
                             </div>
+                        </button>
+                    {/if}
+
+                    <!-- Toggle Memoisation -->
+                    {#if call.isMemoisable()}
+                        <button 
+                            on:click={toggleMemoise}
+                            disabled={playing}
+                            class="bg-white rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:outline hover:outline-blue-400 hover:outline-2"
+                            class:bg-white={!playing}
+                            class:bg-gray-400={playing}
+                        >
+                            {#if call.memoise}
+                                <Icon src={FaSolidSave} size="16"/>
+                            {:else}
+                                <Icon src={FaSave} size="16"/>
+                            {/if}
                         </button>
                     {/if}
                 </div>

@@ -1,4 +1,4 @@
-import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
+import { RecursiveCall, RecursiveCase, DivideCase, BaseCase } from "$lib/core/recursive_call"
 import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { NumberValue } from "$lib/core/values"
 
@@ -11,8 +11,7 @@ export interface KaratsubaInput {
 
 export class KaratsubaCall extends RecursiveCall<KaratsubaInput, NumberValue> {
 
-    constructor(input: KaratsubaInput) {
-        super(input)
+    constructor(input: KaratsubaInput, root: KaratsubaCall | null = null) {
         if (input.x.value < 0 || input.y.value < 0) {
             throw new Error("Please enter positive numbers.")
         }
@@ -22,15 +21,16 @@ export class KaratsubaCall extends RecursiveCall<KaratsubaInput, NumberValue> {
         if (input.x.value > 9999999 || input.y.value > 9999999) {
             throw new Error("Please enter numbers less than 10,000,000.")
         }
+        super(input, root)
     }
         
-    case(): DivideCase<KaratsubaInput, NumberValue> | BaseCase<KaratsubaInput, NumberValue> {
+    case(root: KaratsubaCall): RecursiveCase<KaratsubaInput, NumberValue> {
         const x = this.input().x.value
         const y = this.input().y.value
         if (x < 10 || y < 10) {
             return new KaratsubaBaseCase(this.input())
         } else {
-            return new KaratsubaDivideCase(this.input())
+            return new KaratsubaDivideCase(this.input(), root)
         }
     }
 
@@ -49,7 +49,7 @@ export class KaratsubaCall extends RecursiveCall<KaratsubaInput, NumberValue> {
 
 export class KaratsubaDivideCase extends DivideCase<KaratsubaInput, NumberValue> {
 
-    divide(input: KaratsubaInput): RecursiveCalls<KaratsubaInput, NumberValue> {
+    divide(input: KaratsubaInput, root: KaratsubaCall): RecursiveCalls<KaratsubaInput, NumberValue> {
         const n = Math.max(Math.floor(Math.log10(input.x.value)) + 1, Math.floor(Math.log10(input.y.value)) + 1)
         const half = Math.floor(n / 2)
         const divisor = Math.pow(10, half)
@@ -60,9 +60,9 @@ export class KaratsubaDivideCase extends DivideCase<KaratsubaInput, NumberValue>
         const d = input.y.value % divisor
 
         return {
-            "ac": new KaratsubaCall({ x: new NumberValue(a), y: new NumberValue(c) }),
-            "bd": new KaratsubaCall({ x: new NumberValue(b), y: new NumberValue(d) }),
-            "(a+b)(c+d)": new KaratsubaCall({ x: new NumberValue(a + b), y: new NumberValue(c + d) })
+            "ac": new KaratsubaCall({ x: new NumberValue(a), y: new NumberValue(c) }, root),
+            "bd": new KaratsubaCall({ x: new NumberValue(b), y: new NumberValue(d) }, root),
+            "(a+b)(c+d)": new KaratsubaCall({ x: new NumberValue(a + b), y: new NumberValue(c + d) }, root)
         }
     }
 

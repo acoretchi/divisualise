@@ -1,4 +1,4 @@
-import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
+import { RecursiveCall, RecursiveCase, DivideCase, BaseCase } from "$lib/core/recursive_call"
 import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { NumberList, NumberValue } from "$lib/core/values"
 
@@ -10,22 +10,22 @@ export interface MaximalSubarrayInput {
 
 export class MaximalSubarrayCall extends RecursiveCall<MaximalSubarrayInput, NumberList> {
 
-    constructor(input: MaximalSubarrayInput) {
-        super(input)
+    constructor(input: MaximalSubarrayInput, root: MaximalSubarrayCall | null = null) {
         if (!input.array.values.every(val => Number.isInteger(val.value))) {
             throw new Error("Please enter only integers.")
         }
         if (input.array.values.length === 0) {
             throw new Error("Please enter at least one element.")
         }
+        super(input, root)
     }
 
-    case(): DivideCase<MaximalSubarrayInput, NumberList> | BaseCase<MaximalSubarrayInput, NumberList> {
+    case(root: MaximalSubarrayCall): RecursiveCase<MaximalSubarrayInput, NumberList> {
         const array = this.input().array
         if (array.values.length === 1) {
             return new MaximalSubarrayBaseCase(this.input())
         } else {
-            return new MaximalSubarrayDivideCase(this.input())
+            return new MaximalSubarrayDivideCase(this.input(), root)
         }
     }
 
@@ -42,11 +42,11 @@ export class MaximalSubarrayCall extends RecursiveCall<MaximalSubarrayInput, Num
 
 export class MaximalSubarrayDivideCase extends DivideCase<MaximalSubarrayInput, NumberList> {
 
-    divide(input: MaximalSubarrayInput): RecursiveCalls<MaximalSubarrayInput, NumberList> {
+    divide(input: MaximalSubarrayInput, root: MaximalSubarrayCall): RecursiveCalls<MaximalSubarrayInput, NumberList> {
         const mid = Math.floor(input.array.values.length / 2)
         return {
-            "Left": new MaximalSubarrayCall({ array: new NumberList(input.array.values.slice(0, mid)) }),
-            "Right": new MaximalSubarrayCall({ array: new NumberList(input.array.values.slice(mid)) }),
+            "Left": new MaximalSubarrayCall({ array: new NumberList(input.array.values.slice(0, mid)) }, root),
+            "Right": new MaximalSubarrayCall({ array: new NumberList(input.array.values.slice(mid)) }, root),
         }
     }
 

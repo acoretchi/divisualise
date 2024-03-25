@@ -10,22 +10,26 @@ export interface FibonacciInput {
 
 export class FibonacciCall extends RecursiveCall<FibonacciInput, NumberValue> {
 
-    constructor(input: FibonacciInput) {
-        super(input)
+    constructor(input: FibonacciInput, root: FibonacciCall | null = null) {
         if (input.n.value < 1 || !Number.isInteger(input.n.value)) {
             throw new Error("Fibonacci is only defined for positive integers.")
         } else if (input.n.value > 10) {
             throw new Error("Please enter a number less than or equal to 10.")
         }
+        super(input, root)
     }
 
-    case(): SumCase | FibBaseCase {
+    isMemoisable(): boolean {
+        return true
+    }
+
+    case(root: FibonacciCall): SumCase | FibBaseCase {
         if (this.input().n.value <= 2) {
             return new FibBaseCase({
                 n: this.input().n
             })
         } else {
-            return new SumCase(this.input())
+            return new SumCase(this.input(), root)
         }
     }
 
@@ -54,10 +58,13 @@ export class FibonacciCall extends RecursiveCall<FibonacciInput, NumberValue> {
 
 export class SumCase extends DivideCase<FibonacciInput, NumberValue> {
 
-    divide(input: FibonacciInput): RecursiveCalls<FibonacciInput, NumberValue> {
+    divide(
+        input: FibonacciInput,
+        root: FibonacciCall
+    ): RecursiveCalls<FibonacciInput, NumberValue> {
         return {
-            "First Summand": new FibonacciCall({ n: new NumberValue(input.n.value - 1) }),
-            "Second Summand": new FibonacciCall({ n: new NumberValue(input.n.value - 2) })
+            "First Summand": new FibonacciCall({ n: new NumberValue(input.n.value - 1) }, root),
+            "Second Summand": new FibonacciCall({ n: new NumberValue(input.n.value - 2) }, root)
         }
     }
 
@@ -110,7 +117,6 @@ export class FibBaseCase extends BaseCase<FibonacciInput, NumberValue> {
     }
 
     solvedDetails(input: FibonacciInput): CallDetails {
-        const n = input.n.value
         return [{
             text: `We return 1.`,
             valueKeyframes: [{

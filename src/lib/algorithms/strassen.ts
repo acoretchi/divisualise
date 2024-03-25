@@ -1,4 +1,4 @@
-import { RecursiveCall, DivideCase, BaseCase } from "$lib/core/recursive_call"
+import { RecursiveCall, RecursiveCase, DivideCase, BaseCase } from "$lib/core/recursive_call"
 import type { CallDetails, RecursiveCalls } from "$lib/core/recursive_call"
 import { Matrix, NumberValue } from "$lib/core/values"
 
@@ -11,8 +11,7 @@ export interface StrassenInput {
 
 export class StrassenCall extends RecursiveCall<StrassenInput, Matrix> {
 
-    constructor(input: StrassenInput) {
-        super(input)
+    constructor(input: StrassenInput, root: StrassenCall | null = null) {
         if (input.A.matrix.length !== input.A.matrix[0].length || input.B.matrix.length !== input.B.matrix[0].length) {
             throw new Error("Please enter square matrices.")
         }
@@ -22,14 +21,15 @@ export class StrassenCall extends RecursiveCall<StrassenInput, Matrix> {
         if (input.A.matrix.length % 2 !== 0) {
             throw new Error("The matrices must have a size that is a power of 2.")
         }
+        super(input, root)
     }
     
-    case(): DivideCase<StrassenInput, Matrix> | BaseCase<StrassenInput, Matrix> {
+    case(root: StrassenCall): RecursiveCase<StrassenInput, Matrix> {
         const n = this.input().A.matrix.length
         if (n === 2) {
             return new StrassenBaseCase(this.input())
         } else {
-            return new StrassenDivideCase(this.input())
+            return new StrassenDivideCase(this.input(), root)
         }
     }
 
@@ -47,7 +47,7 @@ export class StrassenCall extends RecursiveCall<StrassenInput, Matrix> {
 
 export class StrassenDivideCase extends DivideCase<StrassenInput, Matrix> {
 
-    divide(input: StrassenInput): RecursiveCalls<StrassenInput, Matrix> {
+    divide(input: StrassenInput, root: StrassenCall): RecursiveCalls<StrassenInput, Matrix> {
         const A = input.A.matrix
         const B = input.B.matrix
         const n = A.length
@@ -67,31 +67,31 @@ export class StrassenDivideCase extends DivideCase<StrassenInput, Matrix> {
             "M1": new StrassenCall({ 
                 A: new Matrix(add(A11, A22)), 
                 B: new Matrix(add(B11, B22))
-            }),
+            }, root),
             "M2": new StrassenCall({ 
                 A: new Matrix(add(A21, A22)), 
                 B: new Matrix(B11)
-            }),
+            }, root),
             "M3": new StrassenCall({ 
                 A: new Matrix(A11), 
                 B: new Matrix(subtract(B12, B22))
-            }),
+            }, root),
             "M4": new StrassenCall({ 
                 A: new Matrix(A22), 
                 B: new Matrix(subtract(B21, B11))
-            }),
+            }, root),
             "M5": new StrassenCall({ 
                 A: new Matrix(add(A11, A12)), 
                 B: new Matrix(B22)
-            }),
+            }, root),
             "M6": new StrassenCall({ 
                 A: new Matrix(subtract(A21, A11)), 
                 B: new Matrix(add(B11, B12))
-            }),
+            }, root),
             "M7": new StrassenCall({ 
                 A: new Matrix(subtract(A12, A22)), 
                 B: new Matrix(add(B21, B22))
-            })
+            }, root)
         }
     }
 

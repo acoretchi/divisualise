@@ -138,13 +138,26 @@
     }
 
     async function step() {
-        if (highlightedCall !== call.next()) {
+        if (
+            highlightedCall === null
+            || (
+                highlightedCall === call.lastActedOn() 
+                && !highlightedCall.isCombinable()
+                && detailsEnded
+            )
+            || highlightedCall !== call.next()
+        ) {
+
             highlightedCall = call.next()
             return
         }
         else if (
             detailsEnded 
             || !showDetails
+            || (
+                highlightedCall === call.next()
+                && highlightedCall.isCombinable()
+            )
         ) {
             callComponent.step()
             call = call

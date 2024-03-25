@@ -231,27 +231,7 @@ export abstract class RecursiveCall<
                         call._state.memoisedPath = mem.firstSolvedPath
                     }
                     else if (
-                        call._state.type === "divided"
-                    ) {
-                        if (
-                            call.pathFromRoot().join(",") !== mem.firstSolvedPath.join(",")
-                        ) {
-                            call._state = {
-                                type: "undivided",
-                                memoisedPath: mem.firstSolvedPath
-                            }
-                        } 
-                        else if (call.isCombinable()) {
-                            call._state = {
-                                type: "memoised",
-                                memoisedPath: mem.firstSolvedPath,
-                                result: mem.result
-                            }                        
-                        }
-                        
-                    }
-                    else if (
-                        call._state.type === "solved"
+                        (call._state.type === "divided" || call._state.type === "solved")
                         && call.pathFromRoot().join(",") !== mem.firstSolvedPath.join(",")
                     ) {
                         if (!this.callFromRoot(mem.firstSolvedPath)?.isSolved()) {
@@ -506,6 +486,26 @@ export abstract class RecursiveCall<
         }
         else {
             return null
+        }
+    }
+
+    // We traverse as if we were performing next() above but keeping track of the previous call
+    // such that we return the last call that was acted on.
+    lastActedOn(): RecursiveCall<In, Out> | null {
+        if (this.isDivisible()) {
+            return null
+        }
+        else if (this._state.type === "divided") {
+            let lastActedOn: RecursiveCall<In, Out> = this
+            for (const subcall of Object.values(this._state.case.calls())) {
+                if (subcall.isDivided()) {
+                    lastActedOn = subcall.lastActedOn() ?? subcall
+                }
+            }
+            return lastActedOn
+        }
+        else {
+            return this
         }
     }
 

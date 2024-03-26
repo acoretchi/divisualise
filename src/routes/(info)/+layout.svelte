@@ -1,5 +1,5 @@
 <div class="flex w-screen h-screen bg-gray-50 justify-center overflow-y-scroll">
-    <div class="flex flex-col w-5/6 md:w-2/3 max-w-xl my-12 md:my-24 h-fit">
+    <div class="flex flex-col w-5/6 md:w-2/3 max-w-xl mt-12 md:mt-24 h-fit">
         <a  
             class="relative flex mx-auto"
             href="/"
@@ -26,7 +26,7 @@
             </a>
         </div>
 
-        <div class="w-full text-md md:text-lg overflow-y-auto">
+        <div class="w-full text-md md:text-lg overflow-y-auto mb-12 md:mb-24">
             <slot />
         </div>
     </div>

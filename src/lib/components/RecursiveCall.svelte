@@ -17,13 +17,20 @@
     export let call: RecursiveCall<In, Out>;
     export let highlightedCall: RecursiveCall<In, Out> | null = null;
     export let callIsBeingConquered: boolean = false;
+    export let showButtons: boolean = true;
     export let detailsHighlight: boolean = false;
-    export let detailsStepIndex: number
-    export let detailsKeyframeIndex: number
+    export let detailsStepIndex: number | null = null;
+    export let detailsKeyframeIndex: number | null = null;
     export let title: string | null = null;
     const dispatch = createEventDispatcher();
     let card: HTMLDivElement;
 
+    $: details = call.details()
+    $: highlightedCalls = (
+        detailsStepIndex !== null ?
+        details[detailsStepIndex].highlightedCalls ?? [] :
+        []
+    )
 
     $: if (highlightedCall === call) {
         let rect = card.getBoundingClientRect()
@@ -128,7 +135,7 @@
             on:keydown={e => e.key === "Enter" && highlightSelf()}
             role="button"
             tabindex="0"
-            class="flex bg-white flex-col justify-center w-fit h-fit rounded-lg mx-8 shadow-2xl"
+            class="flex bg-white flex-col justify-center w-fit h-fit rounded-lg mx-8 shadow-2xl min-w-36"
             class:ring-[16px]={highlightedCall == call || highlightedCall?.memoisedCall() == call || detailsHighlight}
             class:ring-blue-400={highlightedCall == call || highlightedCall?.memoisedCall() == call || detailsHighlight}
             bind:this={card}
@@ -158,77 +165,79 @@
                 <!-- Value -->
                 <Value value={call.input()} dividers={false} />
 
-                <!-- Buttons -->
-                <div class="flex w-full h-fit items-center">
-                    <div class="flex w-1/2 space-x-2 items-center">
-                        <button 
-                            class="transition duration-200 ease-out hover:scale-125"
-                            on:click|stopPropagation={reset}
-                            disabled={!call.isDivided()}
-                        >
-                            <div class:opacity-15={!call.isDivided()}>
-                            <Icon src={ImCross} size="16" />
-                            </div>
-                        </button>
-                    </div>
-                    <div class="flex w-1/2 justify-end space-x-2 items-center ml-2">
-                        <button 
-                            class="transition duration-200 ease-out hover:scale-125"
-                            on:click|stopPropagation={divide}
-                            disabled={!call.isDivisible()}
-                        >
-                            <Icon src={FiDivide} size="20" color={
-                                !call.isDivisible() ? "lightgray" : "red"
-                            }/>
-                        </button>
-                        <button 
-                            class="transition duration-200 ease-out hover:scale-125"
-                            on:click|stopPropagation={conquer}
-                            disabled={!call.isCombinable()}
-                        >
-                            <Icon src={AiOutlineMergeCells} size="20" color={
-                                !call.isCombinable() ? "lightgray" : "#c7a312"
-                            }/>
-                        </button>
-                        <button 
-                            class="transition duration-200 ease-out hover:scale-125"
-                            on:click|stopPropagation={conquer}
-                            disabled={
-                                call.isSolved() 
-                                || (!call.isDivided() && !call.isDivisible())
-                                || call.isCombinable()
-                            }
-                        >
-                            <Icon src={BiFastForward} size="24" color={
-                                (
+                {#if showButtons}
+                    <!-- Buttons -->
+                    <div class="flex w-full h-fit items-center">
+                        <div class="flex w-1/2 space-x-2 items-center">
+                            <button 
+                                class="transition duration-200 ease-out hover:scale-125"
+                                on:click|stopPropagation={reset}
+                                disabled={!call.isDivided()}
+                            >
+                                <div class:opacity-15={!call.isDivided()}>
+                                <Icon src={ImCross} size="16" />
+                                </div>
+                            </button>
+                        </div>
+                        <div class="flex w-1/2 justify-end space-x-2 items-center ml-2">
+                            <button 
+                                class="transition duration-200 ease-out hover:scale-125"
+                                on:click|stopPropagation={divide}
+                                disabled={!call.isDivisible()}
+                            >
+                                <Icon src={FiDivide} size="20" color={
+                                    !call.isDivisible() ? "lightgray" : "red"
+                                }/>
+                            </button>
+                            <button 
+                                class="transition duration-200 ease-out hover:scale-125"
+                                on:click|stopPropagation={conquer}
+                                disabled={!call.isCombinable()}
+                            >
+                                <Icon src={AiOutlineMergeCells} size="20" color={
+                                    !call.isCombinable() ? "lightgray" : "#c7a312"
+                                }/>
+                            </button>
+                            <button 
+                                class="transition duration-200 ease-out hover:scale-125"
+                                on:click|stopPropagation={conquer}
+                                disabled={
                                     call.isSolved() 
-                                    || (!call.isDivided() && !call.isDivisible()) 
+                                    || (!call.isDivided() && !call.isDivisible())
                                     || call.isCombinable()
-                                ) ? "lightgray" : "green"
-                            }/>
-                        </button>
+                                }
+                            >
+                                <Icon src={BiFastForward} size="24" color={
+                                    (
+                                        call.isSolved() 
+                                        || (!call.isDivided() && !call.isDivisible()) 
+                                        || call.isCombinable()
+                                    ) ? "lightgray" : "green"
+                                }/>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                {/if}
             </div>
         </div>
     </div>
 
     <!-- Sub-calls -->
-    {#if !call.isBaseCase() && call._state.type != "undivided" && call._state.case instanceof DivideCase}
+    {#if !call.isBaseCase() && call._state.type != "undivided" && call._state.type !== "memoised" && call._state.case instanceof DivideCase}
         <div class="w-1 h-24 bg-black -z-10"></div>
         <div class="flex justify-center mx-2">
             {#if Object.keys(call._state.case.calls_and_positions()).length === 1}
                 <svelte:self 
                     call={Object.values(call._state.case.calls_and_positions())[0].call} 
+                    bind:showButtons
                     bind:callIsBeingConquered
                     bind:detailsStepIndex
                     bind:detailsKeyframeIndex
                     detailsHighlight={
                         (
                             highlightedCall == call
-                            && call.details()[detailsStepIndex].highlightedCalls
                         ) ?
-                        call.details()[detailsStepIndex].highlightedCalls.includes(name)
+                        highlightedCalls.includes(name)
                         : false
                     }
                     title={highlightedCall == call ? name : null}
@@ -251,15 +260,15 @@
                         {/if}
                         <svelte:self 
                             call={next.call} 
+                            bind:showButtons
                             bind:callIsBeingConquered
                             bind:detailsStepIndex
                             bind:detailsKeyframeIndex
                             detailsHighlight={
                                 (
                                     highlightedCall == call
-                                    && call.details()[detailsStepIndex].highlightedCalls
                                 ) ?
-                                call.details()[detailsStepIndex].highlightedCalls.includes(name)
+                                highlightedCalls.includes(name)
                                 : false
                             }
                             title={highlightedCall == call ? name : null}

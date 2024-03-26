@@ -62,7 +62,7 @@
 </script>
 
 <p>
-This page presents a brief introduction to divide-and-conquer algorithms, dynamic programming, and the notion of algorithmic complexity. For those familiar with these concepts, please skip ahead to the <a href="/tutorial" class="underline text-blue-400">tutorial</a> or begin using <b>Divisualise!</b>
+This page presents a brief introduction to divide-and-conquer algorithms, dynamic programming, and the notion of algorithmic complexity. For those familiar with these concepts, please skip ahead and begin using <b>Divisualise!</b>
 </p>
 <br>
 

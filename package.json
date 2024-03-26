@@ -14,6 +14,7 @@
 	},
 	"devDependencies": {
 		"@sveltejs/kit": "^2.0.0",
+		"@types/katex": "^0.16.7",
 		"@typescript-eslint/eslint-plugin": "^6.0.0",
 		"@typescript-eslint/parser": "^6.0.0",
 		"autoprefixer": "^10.4.16",
@@ -35,6 +36,7 @@
 	"dependencies": {
 		"@fontsource-variable/nunito": "^5.0.18",
 		"@sveltejs/adapter-static": "^3.0.1",
+		"katex": "^0.16.10",
 		"panzoom": "^9.4.3",
 		"svelte-icons-pack": "^2.1.0"
 	}

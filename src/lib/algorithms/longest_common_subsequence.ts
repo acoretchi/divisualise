@@ -13,7 +13,10 @@ export class LCSCall extends RecursiveCall<LCSInput, NumberList> {
         if (input.first.values.length + input.second.values.length > 8) {
             throw new Error("Please enter at most 8 elements between the two lists.")
         }
-        super(input, root)
+        super({
+            first: new NumberList(input.first.values),
+            second: new NumberList(input.second.values)
+        }, root)
     }
 
     isMemoisable(): boolean { return true; }
@@ -32,14 +35,15 @@ export class LCSCall extends RecursiveCall<LCSInput, NumberList> {
         return [{
             text: "We want to find the longest common subsequence between the two lists.",
             valueKeyframes: [{
-                "First": new NumberList(this.input().first.values.map(v => new NumberValue(v.value))),
-                "Second": new NumberList(this.input().second.values.map(v => new NumberValue(v.value)))
+                "First": new NumberList(this.input().first.values.map(v => v.copy())),
+                "Second": new NumberList(this.input().second.values.map(v => v.copy()))
             }]
         }];
     }
 }
 
 export class LCSDivideCase extends DivideCase<LCSInput, NumberList> {
+
     divide(input: LCSInput, root: LCSCall): RecursiveCalls<LCSInput, NumberList> {
         const first = input.first.values;
         const second = input.second.values;
@@ -96,15 +100,15 @@ export class LCSDivideCase extends DivideCase<LCSInput, NumberList> {
         const lastElement2 = second[lastIndex2];
         if (lastElement1.value === lastElement2.value) {
             return [{
-                text: `Both final elements are equal to ${lastElement1.value}, so we include them in the LCS and solve the subproblem without these elements.`,
+                text: `Both final elements are equal to ${lastElement1.value}, so we include them in the longest common subsequence and solve the subproblem without these elements.`,
                 valueKeyframes: [{
                     "First": new NumberList([
-                        ...first.slice(0, lastIndex1).map(v => new NumberValue(v.value).coloured("gray")),
-                        lastElement1.copy().coloured("green")
+                        ...first.slice(0, lastIndex1).map(v => v.coloured("gray")),
+                        lastElement1.coloured("green")
                     ]),
                     "Second": new NumberList([
-                        ...second.slice(0, lastIndex2).map(v => new NumberValue(v.value).coloured("gray")),
-                        lastElement2.copy().coloured("green")
+                        ...second.slice(0, lastIndex2).map(v => v.coloured("gray")),
+                        lastElement2.coloured("green")
                     ])
                 }]
             }];
@@ -113,12 +117,12 @@ export class LCSDivideCase extends DivideCase<LCSInput, NumberList> {
                 text: `The last elements are not equal so we discard them and solve two subproblems, one without each last element.`,
                 valueKeyframes: [{
                     "First": new NumberList([
-                        ...first.slice(0, lastIndex1).map(v => new NumberValue(v.value).coloured("gray")),
-                        lastElement1.copy().coloured("red")
+                        ...first.slice(0, lastIndex1).map(v => v.coloured("gray")),
+                        lastElement1.coloured("red")
                     ]),
                     "Second": new NumberList([
-                        ...second.slice(0, lastIndex2).map(v => new NumberValue(v.value).coloured("gray")),
-                        lastElement2.copy().coloured("red")
+                        ...second.slice(0, lastIndex2).map(v => v.coloured("gray")),
+                        lastElement2.coloured("red")
                     ])
                 }]
             }];
@@ -135,9 +139,9 @@ export class LCSDivideCase extends DivideCase<LCSInput, NumberList> {
             return [{
                 text: `We take the longest subproblem sequence and concatenate our common final element ${lastElement1.value}.`,
                 valueKeyframes: [{
-                    "LCS": new NumberList(lcs.map(v => new NumberValue(v.value).coloured("green"))),
+                    "LCS": new NumberList(lcs.map(v => v.coloured("green"))),
                     "First": new NumberList(first.map(v => 
-                        lcs.includes(v) ? new NumberValue(v.value).coloured("green") : new NumberValue(v.value).coloured("gray")
+                        lcs.includes(v) ? v.coloured("green") : v.coloured("gray")
                     )),
                     "Second": new NumberList(second.map(v =>
                         lcs.includes(v) ? new NumberValue(v.value).coloured("green") : new NumberValue(v.value).coloured("gray")
@@ -146,22 +150,24 @@ export class LCSDivideCase extends DivideCase<LCSInput, NumberList> {
             }];
         } else {
             return [{
-                text: `The final elements of our input are not equal, so we just return the longest LCS from the two subproblems.`,
+                text: `The final elements of our input are not equal, so we just return the longest subsequence from the two subproblems.`,
                 valueKeyframes: [{
-                    "LCS": new NumberList(lcs.map(v => new NumberValue(v.value).coloured("green"))),
+                    "LCS": new NumberList(lcs.map(v => v.coloured("green"))),
                     "First": new NumberList(first.map(v =>
-                        lcs.includes(v) ? new NumberValue(v.value).coloured("green") : new NumberValue(v.value).coloured("gray")
+                        lcs.includes(v) ? v.coloured("green") : v.coloured("gray")
                     )),
                     "Second": new NumberList(second.map(v =>
-                        lcs.includes(v) ? new NumberValue(v.value).coloured("green") : new NumberValue(v.value).coloured("gray")
+                        lcs.includes(v) ? v.coloured("green") : v.coloured("gray")
                     ))
                 }]
             }];
         }
     }
+
 }
 
 export class LCSBaseCase extends BaseCase<LCSInput, NumberList> {
+
     solve(): NumberList {
         return new NumberList([]);
     }
@@ -170,8 +176,8 @@ export class LCSBaseCase extends BaseCase<LCSInput, NumberList> {
         return [{
             text: `One of the lists is empty, so the longest common subsequence is the empty list.`,
             valueKeyframes: [{
-                "First": new NumberList(input.first.values.map(v => new NumberValue(v.value).coloured("gray"))),
-                "Second": new NumberList(input.second.values.map(v => new NumberValue(v.value).coloured("gray")))
+                "First": new NumberList(input.first.values.map(v => v.coloured("gray"))),
+                "Second": new NumberList(input.second.values.map(v => v.coloured("gray")))
             }]
         }];
     }
@@ -181,9 +187,10 @@ export class LCSBaseCase extends BaseCase<LCSInput, NumberList> {
             text: `The longest common subsequence of an empty list and any other list is an empty list.`,
             valueKeyframes: [{
                 "LCS": new NumberList([]),
-                "First": new NumberList(input.first.values.map(v => new NumberValue(v.value).coloured("gray"))),
-                "Second": new NumberList(input.second.values.map(v => new NumberValue(v.value).coloured("gray")))
+                "First": new NumberList(input.first.values.map(v => v.coloured("gray"))),
+                "Second": new NumberList(input.second.values.map(v => v.coloured("gray")))
             }]
         }];
     }
+
 }

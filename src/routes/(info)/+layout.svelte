@@ -26,7 +26,7 @@
             </a>
         </div>
 
-        <div class="w-full text-md md:text-lg overflow-y-auto mb-12 md:mb-24">
+        <div class="w-full text-md md:text-lg overflow-y-auto mb-24">
             <slot />
         </div>
     </div>

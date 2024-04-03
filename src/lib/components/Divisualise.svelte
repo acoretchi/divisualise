@@ -13,6 +13,7 @@
     import FaSave from "svelte-icons-pack/fa/FaSave";
     import FaSolidSave from "svelte-icons-pack/fa/FaSolidSave";
     import FaSolidChevronLeft from "svelte-icons-pack/fa/FaSolidChevronLeft";
+    import HiSolidHome from "svelte-icons-pack/hi/HiSolidHome";
     import HiOutlineVideoCamera from "svelte-icons-pack/hi/HiOutlineVideoCamera";
     import HiSolidVideoCamera from "svelte-icons-pack/hi/HiSolidVideoCamera";
     import ImCross from "svelte-icons-pack/im/ImCross";
@@ -402,15 +403,19 @@
         </div>
 
         <!-- Header -->
-        <div 
-            class="flex p-3 md:p-4 z-50"
-            on:click={() => dispatch("reset")}
-            on:keypress={(e) => e.key === "Enter" && dispatch("reset")}
-            tabindex="0"
-            role="button"
-            aria-label="Menu"
-        >
-            <h1 class="text-3xl font-bold cursor-pointer">Divisualise!</h1>
+        <div class="flex p-3 md:p-4 z-50">
+            <button 
+                on:click={() => dispatch("reset")}
+                class="rounded-full bg-white p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:ring-blue-400 hover:ring-2"
+            >
+                <div class="brightness-0">
+                    <Icon 
+                        src={HiSolidHome} 
+                        size="16" 
+                        color={"black"}
+                    />
+                </div>
+            </button>
         </div>
 
         <!-- Main -->

@@ -136,7 +136,7 @@
                                 <Icon src={FaSolidDivide} size={iconWidth} />
                             </div>
                         {/if}
-                        <span class="ml-2">
+                        <span class="ml-2 max-w-fit text-left">
                             {algorithm.name}
                         </span>
                     </button>

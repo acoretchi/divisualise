@@ -61,7 +61,7 @@
 
 {#if call === null || selectedAlgorithm === null}
     <div class="flex w-screen h-screen bg-gray-50 justify-center overflow-y-scroll">
-        <div class="flex flex-col w-5/6 md:w-2/3 max-w-xl h-fit my-12 md:my-24">
+        <div class="flex flex-col w-5/6 md:w-2/3 max-w-xl h-fit mt-12 mb-24 md:mt-24">
             <div 
                 class="relative flex mx-auto"
                 on:click={reset}

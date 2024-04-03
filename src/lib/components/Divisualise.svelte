@@ -435,18 +435,18 @@
     </div>
 
     <!-- Details -->
-    <div class="flex flex-col md:h-full max-w-1/2 bg-white drop-shadow-2xl border-t-4 md:border-l-4 md:border-t-0 border-black grow-0 transition-all duration-200 ease-in-out transform max-h-[45vh] md:max-h-full {showDetails ? 'h-full md:h-full md:w-[60rem]' : 'h-16 md:w-[4rem]'}"
+    <div class="flex flex-col md:h-full max-w-1/2 bg-white drop-shadow-2xl border-t-4 md:border-l-4 md:border-t-0 border-black grow-0 transition-all duration-200 ease-in-out transform max-h-[45vh] md:max-h-full {showDetails ? 'h-full md:h-full md:w-[60rem]' : 'h-24 md:w-[4rem]'}"
         class:overflow-y-hidden={!showDetails}
         class:overflow-y-auto={showDetails}
     >
-        <div class="flex flex-col items-center min-h-fit {highlightedCall !== null ? 'md:items-start' : ''} w-full md:h-full md:flex-row {showDetails ? 'h-full' : 'h-16'}">
+        <div class="flex flex-col items-center min-h-fit {highlightedCall !== null ? 'md:items-start' : ''} w-full md:h-full md:flex-row">
 
             <!-- Open / Close -->
             <button 
                 class="md:h-full cursor-pointer"
                 on:click={() => showDetails = !showDetails}
             >
-                <div class="w-full p-4 transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}">
+                <div class="w-full p-4 my-auto transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}">
                     <Icon src={FaSolidChevronLeft} size="24" />
                 </div>
             </button>

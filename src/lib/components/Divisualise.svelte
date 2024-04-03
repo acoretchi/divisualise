@@ -406,7 +406,7 @@
         <div class="flex p-3 md:p-4 z-50">
             <button 
                 on:click={() => dispatch("reset")}
-                class="rounded-full p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:ring-blue-400 hover:ring-2"
+                class="rounded-full bg-white p-1.5 md:p-2 cursor-pointer drop-shadow-md hover:drop-shadow-lg border-4 border-black hover:scale-110 active:scale-90 hover:ring-blue-400 hover:ring-2"
             >
                 <div class="brightness-0">
                     <Icon 

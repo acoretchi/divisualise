@@ -446,7 +446,7 @@
                 class="md:h-full cursor-pointer"
                 on:click={() => showDetails = !showDetails}
             >
-                <div class="w-full p-4 my-auto transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}">
+                <div class="w-full p-1 md:p-4 my-auto transition-all transform duration-200 {showDetails ? '-rotate-90 md:rotate-180' : 'rotate-90 md:rotate-0'}">
                     <Icon src={FaSolidChevronLeft} size="24" />
                 </div>
             </button>

@@ -83,7 +83,7 @@ The solution to many problems that we encounter in Computer Science can be most 
 <br>
 
 <p>
-How might we design an algorithm that calculates the {@html renderMath("n")}th Fibonacci number? The idea is simple: to compute {@html renderMath("F\(n\)")}, we compute {@html renderMath("F\(n-1\)")} and {@html renderMath("F\(n-2\)")}, then add them together - this is our <b>recursive case</b>. This process continues until we reach {@html renderMath("F\(1\)")} and {@html renderMath("F\(0\)")}, which we know by definition - we call these our <b>base cases</b>. We might write some code that looks like this:
+How might we design an algorithm that calculates the {@html renderMath("n")}th Fibonacci number? The idea is simple: to compute {@html renderMath("F\(n\)")}, we compute {@html renderMath("F\(n-1\)")} and {@html renderMath("F\(n-2\)")}, then add them together - this is our <b>recursive case</b>. This process continues until we reach {@html renderMath("F\(2\)")} and {@html renderMath("F\(1\)")}, which we know by definition - we call these our <b>base cases</b>. We might write some code that looks like this:
 </p>
 <br>
 
@@ -91,8 +91,8 @@ How might we design an algorithm that calculates the {@html renderMath("n")}th F
 <pre>
 <code>
 {`function fib(n):
-    if n == 1 or n == 0:
-        return n
+    if n == 2 or n == 1:
+        return 1
     else:
         return fib(n-1) + fib(n-2)
 `}

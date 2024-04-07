@@ -20,12 +20,15 @@ export class MaximalSubarrayCall extends RecursiveCall<MaximalSubarrayInput, Num
         super(input, root)
     }
 
-    case(root: MaximalSubarrayCall): RecursiveCase<MaximalSubarrayInput, NumberList> {
-        const array = this.input().array
+    case(
+        input: MaximalSubarrayInput,
+        root: MaximalSubarrayCall
+    ): RecursiveCase<MaximalSubarrayInput, NumberList> {
+        const array = input.array
         if (array.values.length === 1) {
-            return new MaximalSubarrayBaseCase(this.input())
+            return new MaximalSubarrayBaseCase(input)
         } else {
-            return new MaximalSubarrayDivideCase(this.input(), root)
+            return new MaximalSubarrayDivideCase(input, root)
         }
     }
 

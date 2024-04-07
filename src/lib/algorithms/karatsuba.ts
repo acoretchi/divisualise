@@ -24,13 +24,16 @@ export class KaratsubaCall extends RecursiveCall<KaratsubaInput, NumberValue> {
         super(input, root)
     }
         
-    case(root: KaratsubaCall): RecursiveCase<KaratsubaInput, NumberValue> {
-        const x = this.input().x.value
-        const y = this.input().y.value
+    case(
+        input: KaratsubaInput,
+        root: KaratsubaCall
+    ): RecursiveCase<KaratsubaInput, NumberValue> {
+        const x = input.x.value
+        const y = input.y.value
         if (x < 10 || y < 10) {
-            return new KaratsubaBaseCase(this.input())
+            return new KaratsubaBaseCase(input)
         } else {
-            return new KaratsubaDivideCase(this.input(), root)
+            return new KaratsubaDivideCase(input, root)
         }
     }
 

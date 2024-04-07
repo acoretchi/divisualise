@@ -21,13 +21,11 @@ export class FibonacciCall extends RecursiveCall<FibonacciInput, NumberValue> {
 
     isMemoisable(): boolean { return true }
 
-    case(root: FibonacciCall): SumCase | FibBaseCase {
-        if (this.input().n.value <= 2) {
-            return new FibBaseCase({
-                n: this.input().n
-            })
+    case(input: FibonacciInput, root: FibonacciCall): SumCase | FibBaseCase {
+        if (input.n.value <= 2) {
+            return new FibBaseCase(input)
         } else {
-            return new SumCase(this.input(), root)
+            return new SumCase(input, root)
         }
     }
 

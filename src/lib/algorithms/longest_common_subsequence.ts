@@ -21,13 +21,13 @@ export class LCSCall extends RecursiveCall<LCSInput, NumberList> {
 
     isMemoisable(): boolean { return true; }
 
-    case(root: LCSCall): RecursiveCase<LCSInput, NumberList> {
-        const first = this.input().first.values;
-        const second = this.input().second.values;
+    case(input: LCSInput, root: LCSCall): RecursiveCase<LCSInput, NumberList> {
+        const first = input.first.values;
+        const second = input.second.values;
         if (first.length === 0 || second.length === 0) {
-            return new LCSBaseCase(this.input());
+            return new LCSBaseCase(input);
         } else {
-            return new LCSDivideCase(this.input(), root);
+            return new LCSDivideCase(input, root);
         }
     }
 

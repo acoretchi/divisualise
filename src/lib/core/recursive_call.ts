@@ -190,7 +190,7 @@ export abstract class RecursiveCall<
     }
 
     // Given the input to the call, return the appropriate RecursiveCase.
-    abstract case(root: RecursiveCall<In, Out>): RecursiveCase<In, Out>
+    abstract case(input: In, root: RecursiveCall<In, Out>): RecursiveCase<In, Out>
 
 
     // Return the details for the undivided state.
@@ -406,7 +406,7 @@ export abstract class RecursiveCall<
             }
             else {
                 // We ensure that every node in the tree tracks the first solved paths.
-                const nextCase = this.case(this.root)
+                const nextCase = this.case(copyValueOrObject(this.input()) as In, this.root)
                 this._state = {
                     type: "divided",
                     case: nextCase
@@ -581,17 +581,17 @@ export abstract class RecursiveCall<
         if (this.isRootMemoised()) {
             affectedPaths.push(...this.allSubcallPaths())
             for (const otherCall of this.allTreeCalls().reverse()) {
-                if (
+                // We can't affect any calls that come before this call in the tree.
+                if (otherCall === this) {
+                    break
+                }
+                else if (
                     otherCall.memoisedPath() !== null
                     && affectedPaths.some(
                         path => path.join(",") === otherCall.memoisedPath()!.join(",")
                     )
                 ) {
                     otherCall.reset()
-                }
-                // We can't affect any calls that come before this call in the tree.
-                if (otherCall === this) {
-                    break
                 }
             }            
         }

@@ -15,13 +15,11 @@ export class MergeSortCall extends RecursiveCall<MergeSortInput, NumberList> {
         super(input, root)
     }
 
-    case(root: MergeSortCall): RecursiveCase<MergeSortInput, NumberList> {
-        if (this.input().array.values.length <= 1) {
-            return new MergeSortBaseCase({
-                array: this.input().array
-            })
+    case(input: MergeSortInput, root: MergeSortCall): RecursiveCase<MergeSortInput, NumberList> {
+        if (input.array.values.length <= 1) {
+            return new MergeSortBaseCase(input)
         } else {
-            return new MergeCase(this.input(), root)
+            return new MergeCase(input, root)
         }
     }
 

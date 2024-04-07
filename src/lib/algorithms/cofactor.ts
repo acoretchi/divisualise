@@ -20,12 +20,14 @@ export class CofactorExpansionCall extends RecursiveCall<CofactorExpansionInput,
         super(input, root)
     }
 
-    case(root: CofactorExpansionCall): RecursiveCase<CofactorExpansionInput, NumberValue> {
-        const matrix = this.input().matrix.copy()
-        if (matrix.matrix.length === 2) {
-            return new CofactorExpansionBaseCase(this.input())
+    case(
+        input: CofactorExpansionInput,
+        root: CofactorExpansionCall
+    ): RecursiveCase<CofactorExpansionInput, NumberValue> {
+        if (input.matrix.matrix.length === 2) {
+            return new CofactorExpansionBaseCase(input)
         } else {
-            return new CofactorExpansionDivideCase(this.input(), root)
+            return new CofactorExpansionDivideCase(input, root)
         }
     }
 

@@ -27,7 +27,7 @@
 
     $: details = call.details()
     $: highlightedCalls = (
-        detailsStepIndex !== null ?
+        detailsStepIndex !== null && details[detailsStepIndex] ?
         details[detailsStepIndex].highlightedCalls ?? [] :
         []
     )

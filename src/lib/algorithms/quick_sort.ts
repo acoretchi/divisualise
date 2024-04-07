@@ -11,12 +11,12 @@ export class QuickSortCall extends RecursiveCall<QuickSortInput, NumberList> {
         return "Quick Sort";
     }
 
-    case(root: QuickSortCall): RecursiveCase<QuickSortInput, NumberList> {
-        const array = this.input().array.values;
+    case(input: QuickSortInput, root: QuickSortCall): RecursiveCase<QuickSortInput, NumberList> {
+        const array = input.array.values;
         if (array.length <= 1) {
-            return new QuickSortBaseCase({ array: this.input().array })
+            return new QuickSortBaseCase(input)
         } else {
-            return new QuickSortDivideCase(this.input(), root);
+            return new QuickSortDivideCase(input, root);
         }
     }
 

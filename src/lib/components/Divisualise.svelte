@@ -41,7 +41,6 @@
     let keyframesPlaying = false
     let playing = false
     let showDetails = false
-    let wasCameraLocked = true
     let lockCamera = true
     let playbackSpeed = 2
 
@@ -49,16 +48,6 @@
     $: if (highlightedCall !== null) {
         detailsStepIndex = 0
         detailsKeyframeIndex = 0
-    }
-
-    $: if (callIsBeingConquered) {
-        wasCameraLocked = lockCamera
-        lockCamera = false
-    }
-
-    $: if (!callIsBeingConquered) {
-        lockCamera = wasCameraLocked
-        highlightedCall = highlightedCall
     }
 
     // Set the value keyframes as the value keyframes of the current details step

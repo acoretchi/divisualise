@@ -24,12 +24,12 @@ export class StrassenCall extends RecursiveCall<StrassenInput, Matrix> {
         super(input, root)
     }
     
-    case(root: StrassenCall): RecursiveCase<StrassenInput, Matrix> {
-        const n = this.input().A.matrix.length
+    case(input: StrassenInput, root: StrassenCall): RecursiveCase<StrassenInput, Matrix> {
+        const n = input.A.matrix.length
         if (n === 2) {
-            return new StrassenBaseCase(this.input())
+            return new StrassenBaseCase(input)
         } else {
-            return new StrassenDivideCase(this.input(), root)
+            return new StrassenDivideCase(input, root)
         }
     }
 

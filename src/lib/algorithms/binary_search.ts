@@ -28,24 +28,24 @@ export class BinarySearchCall extends RecursiveCall<BinarySearchInput, NumberVal
         super(input, root)
     }
 
-    case(root: BinarySearchCall): RecursiveCase<BinarySearchInput, NumberValue> {
-        const array = this.input().array.values
-        const target = this.input().target
+    case(input: BinarySearchInput, root: BinarySearchCall): RecursiveCase<BinarySearchInput, NumberValue> {
+        const array = input.array.values
+        const target = input.target
         if (array.length === 1) {
             if (array[0].value === target.value) {
-                return new BinarySearchFoundCase(this.input())
+                return new BinarySearchFoundCase(input)
             }
             else {
-                return new BinarySearchUnfoundCase(this.input())
+                return new BinarySearchUnfoundCase(input)
             }
         } 
         else {
             const middle = Math.floor(array.length / 2)
             if (array[middle].value === target.value) {
-                return new BinarySearchFoundCase(this.input())
+                return new BinarySearchFoundCase(input)
             } 
             else {
-                return new BinarySearchDivideCase(this.input(), root)
+                return new BinarySearchDivideCase(input, root)
             }
         }
     }

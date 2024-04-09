@@ -9,9 +9,6 @@
             >
                 Divisualise!
             </h1>
-            <div class="text-xs md:text-md bg-blue-400 rounded-full absolute left-[98%] bottom-[60%] py-1 px-2 text-white font-bold">
-                Alpha!
-            </div>
         </a>
         <div class="text-xs md:text-md mx-auto text-gray-400 font-semibold mb-2 md:mb-4">
             By <a href="https://armandcoretchi.com" target="_blank" class="text-blue-400 underline">Armand Coretchi</a>.

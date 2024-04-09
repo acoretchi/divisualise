@@ -75,9 +75,6 @@
                 >
                     Divisualise!
                 </h1>
-                <div class="text-xs md:text-md bg-blue-400 rounded-full absolute left-[98%] bottom-[60%] py-1 px-2 text-white font-bold">
-                    Alpha!
-                </div>
             </div>
             <div class="text-xs md:text-md mx-auto text-gray-400 font-semibold mb-2 md:mb-4">
                 By <a href="https://armandcoretchi.com" target="_blank" class="text-blue-400 underline">Armand Coretchi</a>.
@@ -92,9 +89,6 @@
                 </a>
             </div>
 
-            <span class="text-md md:text-xl font-bold mx-auto mb-4 md:mb-8">
-                Please complete the <a href="https://forms.gle/bthpuGJ6CdeES7q9A" target="_blank" class="text-blue-400 underline">user survey</a> after using Divisualise!
-            </span>
 
             {#if selectedAlgorithm === null}
                 <h2 class="text-xl md:text-2xl font-bold mx-auto mb-2 md:mb-4">

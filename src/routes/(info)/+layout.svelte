@@ -18,9 +18,6 @@
             <a href="/about">
                 About
             </a>
-            <a href="/primer">
-                Primer
-            </a>
         </div>
 
         <div class="w-full text-md md:text-lg overflow-y-auto mb-24">

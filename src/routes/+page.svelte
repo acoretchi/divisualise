@@ -84,9 +84,6 @@
                 <a href="/about">
                     About
                 </a>
-                <a href="/primer">
-                    Primer
-                </a>
             </div>
 
 
